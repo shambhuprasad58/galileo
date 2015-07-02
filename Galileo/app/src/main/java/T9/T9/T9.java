@@ -36,7 +36,7 @@ public class T9
         Node node = dictionary.filter(key);
         return node.getSubTreeSize();
     }
-    public LinkedList<String>[] traverseDictionary()
+    public LinkedList<ContactData> traverseDictionary()
     {
         LinkedList<ContactData> masterList = new LinkedList<ContactData>();
         Stack<Integer> stack = new Stack<Integer>();
@@ -96,6 +96,6 @@ public class T9
             }
         }while(!stack.isEmpty());
 
-        return null;
+        return masterList;
     }
 }
