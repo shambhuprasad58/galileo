@@ -14,6 +14,10 @@ import Trie.NodeList;
  */
 public class T9
 {
+    public Trie getDictionary() {
+        return dictionary;
+    }
+
     Trie dictionary;
 
     public T9()
