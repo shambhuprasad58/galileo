@@ -26,7 +26,7 @@ public class ActionIdentifier {
     @SuppressLint("NewApi")
     public static int IdentifyAction(Touch start, Touch end, boolean moved, int currentAppStatus, Vibrator vibrator, TextToSpeech speech, T9 T9Dictioary, Context context)
     {
-        Log.d("IdentifyAction: ", "ENTEREDDDDDDDDDD");
+        Log.d("galileo_mytag ", "ENTEREDDDDDDDDDD");
         //speech.speak("SHHHHHH KOI HAI", TextToSpeech.QUEUE_FLUSH, null);
 
         //Vibrate vibrate = new Vibrate(vibrator);
@@ -34,17 +34,18 @@ public class ActionIdentifier {
 
         if(Math.abs(start.pos_x - end.pos_x) > MoveThresholdPos || Math.abs(start.pos_y - end.pos_y) > MoveThresholdPos)
         {
-            Log.d("IdentifyAction: ", "MOVEEEEEEEEEEEE");
+            Log.d("galileo_mytag ", "MOVEEEEEEEEEEEE");
             //Move Action
             int moveDirection = getMoveDirection(start, end);
-            Log.d("IdentifyAction: ", "MOVE DIRECTION " + moveDirection);
+            Log.d("galileo_mytag ", "MOVE DIRECTION " + moveDirection);
             switch(moveDirection)
             {
                 case 1: //UP: start search for 5
                     currentAppStatus = AppStatus.searchingFor5;
                     break;
                 case 2: //DOWN: delete all data entered
-                    Log.d("IdentifyAction: ", "SWIPE DOWN");
+                    Log.d("galileo_mytag ", "SWIPE DOWN");
+                    //       Call("09800160757", context);
                     if(currentAppStatus != AppStatus.searchingFor5) {
                         currentAppStatus = AppStatus.enteringNumbers;
                         T9Dictioary.clear();
@@ -54,23 +55,29 @@ public class ActionIdentifier {
                     if(currentAppStatus != AppStatus.searchingFor5)
                     {
                         //Delete last digit
-                        speech.speak("BACK", TextToSpeech.QUEUE_FLUSH, null);
+                        //speech.speak("BACK", TextToSpeech.QUEUE_FLUSH, null);
+                        int count = T9Dictioary.filter('\b');
+                        if(count == -1)
+                            speech.speak("Soory", TextToSpeech.QUEUE_FLUSH, null);
+                        else
+                            speech.speak(count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
                         //T9 update
                     }
                     break;
                 case 4: //RIGHT: Announce to call
                     //clear all
                     if(currentAppStatus != AppStatus.searchingFor5) {
-                        if (T9Dictioary.getDictionary().getHead().getSubTreeSize() == 0) {
+                        if (T9Dictioary.getDictionary().getHead() == null || T9Dictioary.getDictionary().getHead().getSubTreeSize() == 0) {
                             speech.speak("NO CONTACT FOUND. CALLING DIALED NUMBER", TextToSpeech.QUEUE_FLUSH, null);
-                            Call("09800160757", context);
+                            Call(T9Dictioary.getCurrentString(), context);
                         }
-                        if (T9Dictioary.getDictionary().getHead().getSubTreeSize() < 9) {
+                        else if (T9Dictioary.getDictionary().getHead().getSubTreeSize() < 9) {
                             list = T9Dictioary.traverseDictionary();
                             speech.speak("ANNOUNCING", TextToSpeech.QUEUE_FLUSH, null);
                             for (int i = 0; i < list.size(); i++) {
                                 speech.speak("PRESS " + (i + 1) + " FOR " + list.get(i).getName(), TextToSpeech.QUEUE_ADD, null);
                             }
+                            currentAppStatus = AppStatus.announcingResults;
                         } else {
                             speech.speak("TOO MANY RESULTS", TextToSpeech.QUEUE_FLUSH, null);
                         }
@@ -85,14 +92,14 @@ public class ActionIdentifier {
             if(currentAppStatus == AppStatus.enteringNumbers)
             {
                 //Next number
-                Log.d("IdentifyAction: ", "TAPPPPPEDDDD ");
+                Log.d("galileo_mytag ", "TAPPPPPEDDDD ");
                 int count = T9Dictioary.filter(clickedNumber);
                 speech.speak(count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
             }
             else if(currentAppStatus == AppStatus.announcingResults)
             {
                 //Call
-                Log.d("IdentifyAction: ", "ANNOUNCING RESULTS CALLING");
+                Log.d("galileo_mytag ", "ANNOUNCING RESULTS CALLING");
                 Call(list.get(clickedNumber-'0'-1).getNumber(), context);
             }
         }
@@ -159,10 +166,11 @@ public class ActionIdentifier {
     {
         try {
             Intent callIntent = new Intent(Intent.ACTION_CALL);
+            callIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             callIntent.setData(Uri.parse("tel:" + number));
             context.startActivity(callIntent);
         } catch (ActivityNotFoundException activityException) {
-            Log.e("Calling a Phone Number", "Call failed", activityException);
+            Log.e("galileo_mytag", "Call failed", activityException);
         }
     }
 
@@ -174,7 +182,8 @@ public class ActionIdentifier {
         }
         Vibrate vibrate = new Vibrate(vibrator);
         int strength = (int)(Math.abs(point.pos_x - (AppConstants.TEXTVIEW5_POSITION_X + AppConstants.TEXTVIEW_WIDTH /2)) + Math.abs(point.pos_y - (AppConstants.TEXTVIEW5_POSITION_Y + AppConstants.TEXTVIEW_HEIGHT /2)));
-        vibrate.vibrate(1, 10, strength);
+        int complement = (int)(Math.abs(AppConstants.TEXTVIEW1_POSITION_X - (AppConstants.TEXTVIEW5_POSITION_X + AppConstants.TEXTVIEW_WIDTH /2)) + Math.abs(AppConstants.TEXTVIEW1_POSITION_Y - (AppConstants.TEXTVIEW5_POSITION_Y + AppConstants.TEXTVIEW_HEIGHT /2)));
+        vibrate.vibrate(1, strength/10, (complement > strength)?(complement - strength)/10:0);
         return AppStatus.searchingFor5;
     }
 }

@@ -18,6 +18,7 @@ import android.widget.TextView;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import T9.T9;
+import  Contacts.*;
 
 
 public class MainActivity extends AppCompatActivity{
@@ -37,6 +38,9 @@ public class MainActivity extends AppCompatActivity{
         SenseDataList = new ConcurrentLinkedDeque<Touch>();
         vibrator = (Vibrator) getSystemService(this.VIBRATOR_SERVICE);
         T9Dictionary = new T9();
+        Contacts allPhoneContacts = new Contacts(this);
+        Log.d("galileo_mytag", "Contacts class created");
+        allPhoneContacts.fetchList(T9Dictionary);
         LinearLayout baselayout = (LinearLayout) findViewById(R.id.base_layout);
         baselayout.getX();
 
@@ -44,7 +48,7 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_DOWN || motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
-                    Log.e("Touch : " + motionEvent.getAction(),
+                    Log.e("galileo_mytag" + motionEvent.getAction(),
                             String.valueOf(motionEvent.getX()) + "x" + String.valueOf(motionEvent.getY()) + "xxxx" + motionEvent.getRawX() + "x" + motionEvent.getRawY());
                     SenseDataList.addFirst(new Touch(motionEvent.getRawX(), motionEvent.getRawY(), motionEvent.getAction(), System.currentTimeMillis()));
                 }
@@ -67,7 +71,7 @@ public class MainActivity extends AppCompatActivity{
                 mTts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
                     @Override
                     public void onInit(int i) {
-                        Log.d("xxxxxxxxxxx", "xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+                        Log.d("galileo_mytag", "xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
                         mTts.speak("Hello folks, welcome to my little demo on Text To Speech.",
                                 TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
                                 null);
@@ -154,7 +158,7 @@ public class MainActivity extends AppCompatActivity{
         AppConstants.TEXTVIEW_SHARP_POSITION_X = location[0];
         AppConstants.TEXTVIEW_SHARP_POSITION_Y = location[1];
 
-        Log.d("TEXTVIEW5 POSITION: ", AppConstants.TEXTVIEW5_POSITION_X + "--------------" + AppConstants.TEXTVIEW5_POSITION_Y);
+        Log.d("galileo_mytag", AppConstants.TEXTVIEW5_POSITION_X + "--------------" + AppConstants.TEXTVIEW5_POSITION_Y);
     }
 
     public void setAppConstantsPositions()
@@ -167,15 +171,15 @@ public class MainActivity extends AppCompatActivity{
         @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         @Override
         protected Void doInBackground(Void... v) {
-            Log.d("ASYNC TASK: ", "BACKGROUNDddddddddddddd");
+            Log.d("galileo_mytag", "BACKGROUNDddddddddddddd");
             boolean moved;
             SenseDataList.clear();
             int currentAppStatus = AppStatus.enteringNumbers;
             while(true) {
                 if(!SenseDataList.isEmpty()) {
-                    Log.d("ASYNC TASK: ", "LIST NOT EMPTY");
-                    if (SenseDataList.peek().type == MotionEvent.ACTION_UP) {
-                        Log.d("ASYNC TASK: ", "ACTION UP");
+                    Log.d("galileo_mytag", "LIST NOT EMPTY");
+                    if (SenseDataList.peek().type == MotionEvent.ACTION_UP || currentAppStatus == AppStatus.searchingFor5) {
+                        Log.d("galileo_mytag", "ACTION UP");
                         moved = false;
                         Touch end = SenseDataList.getFirst();
                         Touch start = SenseDataList.getLast();

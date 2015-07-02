@@ -58,7 +58,7 @@ public class Trie
                 temporary = current.getNext();
 
                 //create node list
-                tempNodeList = new NodeList(current);
+                tempNodeList = new NodeList();
                 //get list
                 tempList = tempNodeList.getList();
                 //insert new node
