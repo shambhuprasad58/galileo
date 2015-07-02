@@ -1,24 +1,24 @@
 package com.microsoft.anonymousknights.galileo;
 
-import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import T9.T9;
 
 
 
 public class MainActivity extends AppCompatActivity {
+
+    ConcurrentLinkedQueue<Touch> SenseDataList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,22 +31,13 @@ public class MainActivity extends AppCompatActivity {
 //
 //        setContentView(new GenerateInterface(this).createGridLayout(), relativeLayoutParams);
         setContentView(R.layout.activity_main);
+        SenseDataList = new ConcurrentLinkedQueue<Touch>();
         LinearLayout baselayout = (LinearLayout) findViewById(R.id.base_layout);
         baselayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN){
-                    Log.e("Touch : DOWN",
+                Log.e("Touch : " + motionEvent.getAction(),
                             String.valueOf(motionEvent.getX()) + "x" + String.valueOf(motionEvent.getY()));
-                }
-                if (motionEvent.getAction() == MotionEvent.ACTION_UP){
-                    Log.e("Touch UP: ",
-                            String.valueOf(motionEvent.getX()) + "x" + String.valueOf(motionEvent.getY()));
-                }
-                if (motionEvent.getAction() == MotionEvent.ACTION_MOVE){
-                    Log.e("Touch MOVE: ",
-                            String.valueOf(motionEvent.getX()) + "x" + String.valueOf(motionEvent.getY()));
-                }
                 return true;
             }
         });
@@ -57,16 +48,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 	T9 t9 = new T9();
-        /*
-        t9.addToDictionary("23", "ad");
-        t9.addToDictionary("23", "be");
-        t9.addToDictionary("24",  "ag");
-        t9.addToDictionary("34", "dg");
         t9.clear();
         int x = t9.filter('3');
-
         Log.d("AAAAAAAAAAAAAAAAAAAAA", Integer.toString(x));
-        */
     }
 
     @Override
@@ -89,5 +73,24 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    class RequestTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... v) {
+            while(true) {
+                if (SenseDataList.peek().type == MotionEvent.ACTION_DOWN) {
+                    ActionIdentifier.IdentifyAction(SenseDataList);
+                }
+            }
+            //return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            //Do anything with response..
+        }
     }
 }
