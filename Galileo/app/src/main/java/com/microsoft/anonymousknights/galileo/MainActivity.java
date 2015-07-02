@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -39,14 +40,15 @@ public class MainActivity extends AppCompatActivity{
         vibrator = (Vibrator) getSystemService(this.VIBRATOR_SERVICE);
         T9Dictionary = new T9();
         LinearLayout baselayout = (LinearLayout) findViewById(R.id.base_layout);
+        baselayout.getX();
 
         baselayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_DOWN || motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
                     Log.e("Touch : " + motionEvent.getAction(),
-                            String.valueOf(motionEvent.getX()) + "x" + String.valueOf(motionEvent.getY()));
-                    SenseDataList.addFirst(new Touch(motionEvent.getX(), motionEvent.getY(), motionEvent.getAction(), System.currentTimeMillis()));
+                            String.valueOf(motionEvent.getX()) + "x" + String.valueOf(motionEvent.getY()) + "xxxx" + motionEvent.getRawX() + "x" + motionEvent.getRawY());
+                    SenseDataList.addFirst(new Touch(motionEvent.getRawX(), motionEvent.getRawY(), motionEvent.getAction(), System.currentTimeMillis()));
                 }
                 return true;
             }
@@ -58,6 +60,14 @@ public class MainActivity extends AppCompatActivity{
 
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+        TextView textView5 = (TextView) findViewById(R.id.TextView5);
+        int[] location = new int[2];
+        textView5.getLocationOnScreen(location);
+        AppConstants.TEXTVIEW5_POSITION_X = location[0];
+        AppConstants.TEXTVIEW5_POSITION_Y = location[1];
+        AppConstants.TEXTVIEW5_WIDTH = textView5.getWidth();
+        AppConstants.TEXTVIEW5_HEIGHT = textView5.getHeight();
+        Log.d("TEXTVIEW5 POSITION: ", AppConstants.TEXTVIEW5_POSITION_X + "--------------" + AppConstants.TEXTVIEW5_POSITION_Y);
         if (requestCode == MY_DATA_CHECK_CODE)
         {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS)
@@ -92,8 +102,8 @@ public class MainActivity extends AppCompatActivity{
         @Override
         protected Void doInBackground(Void... v) {
             Log.d("ASYNC TASK: ", "BACKGROUNDddddddddddddd");
-            long previousClickTime = 0;
             boolean moved;
+            SenseDataList.clear();
             int currentAppStatus = AppStatus.enteringNumbers;
             while(true) {
                 if(!SenseDataList.isEmpty()) {
@@ -106,8 +116,10 @@ public class MainActivity extends AppCompatActivity{
                         if(SenseDataList.size() > 5)
                             moved = true;
                         SenseDataList.clear();
-                        currentAppStatus = ActionIdentifier.IdentifyAction(start, end, previousClickTime, moved, currentAppStatus, vibrator, mTts, T9Dictionary, getApplicationContext());
-                        previousClickTime = end.timestamp;
+                        if(currentAppStatus == AppStatus.searchingFor5)
+                            currentAppStatus = ActionIdentifier.searchingForFive(end, vibrator, mTts);
+                        else
+                            currentAppStatus = ActionIdentifier.IdentifyAction(start, end, moved, currentAppStatus, vibrator, mTts, T9Dictionary, getApplicationContext());
                     }
                 }
                 try {

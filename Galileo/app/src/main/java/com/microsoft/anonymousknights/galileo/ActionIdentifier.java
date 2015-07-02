@@ -28,7 +28,7 @@ public class ActionIdentifier {
     private static final int MoveThresholdPos = 200;
     private static LinkedList<ContactData> list;
     @SuppressLint("NewApi")
-    public static int IdentifyAction(Touch start, Touch end, long previousClickTime, boolean moved, int currentAppStatus, Vibrator vibrator, TextToSpeech speech, T9 T9Dictioary, Context context)
+    public static int IdentifyAction(Touch start, Touch end, boolean moved, int currentAppStatus, Vibrator vibrator, TextToSpeech speech, T9 T9Dictioary, Context context)
     {
         Log.d("IdentifyAction: ", "ENTEREDDDDDDDDDD");
         //speech.speak("SHHHHHH KOI HAI", TextToSpeech.QUEUE_FLUSH, null);
@@ -146,8 +146,15 @@ public class ActionIdentifier {
         }
     }
 
-    public static void searchingForFive(Touch point)
+    public static int searchingForFive(Touch point, Vibrator vibrator, TextToSpeech speech)
     {
-
+        if(point.pos_x > (AppConstants.TEXTVIEW5_POSITION_X + (AppConstants.TEXTVIEW5_WIDTH/4)) && point.pos_x < (AppConstants.TEXTVIEW5_POSITION_X + (3*AppConstants.TEXTVIEW5_WIDTH/4)) && point.pos_y > (AppConstants.TEXTVIEW5_POSITION_Y + (AppConstants.TEXTVIEW5_HEIGHT/4)) && point.pos_y < (AppConstants.TEXTVIEW5_POSITION_Y + (3*AppConstants.TEXTVIEW5_HEIGHT/4))) {
+            speech.speak("5 FOUND. START TYPING", TextToSpeech.QUEUE_FLUSH, null);
+            return AppStatus.enteringNumbers;
+        }
+        Vibrate vibrate = new Vibrate(vibrator);
+        int strength = (int)(Math.abs(point.pos_x - (AppConstants.TEXTVIEW5_POSITION_X + AppConstants.TEXTVIEW5_WIDTH/2)) + Math.abs(point.pos_y - (AppConstants.TEXTVIEW5_POSITION_Y + AppConstants.TEXTVIEW5_HEIGHT/2)));
+        vibrate.vibrate(1, 10, strength);
+        return AppStatus.searchingFor5;
     }
 }

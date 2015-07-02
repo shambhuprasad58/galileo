@@ -62,7 +62,8 @@
                 android:layout_height="match_parent"
                 android:text="5"
                 android:textSize="@dimen/activity_number_size"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:id="@+id/TextView5"/>
             <TextView
                 android:layout_width="0dp"
                 android:layout_weight=".33"
