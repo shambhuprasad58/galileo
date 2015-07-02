@@ -15,8 +15,26 @@ public class NodeList extends Node
 
     public Node[] list;
 
-    public NodeList()
+    public NodeList(Node parent)
     {
-        this.list = new Node[12];
+        this.list = new Node[]
+        {
+            parent,
+            parent,
+            parent,
+            parent,
+            parent,
+            parent,
+            parent,
+            parent,
+            parent,
+            parent,
+            parent,
+            parent,
+            parent,
+            parent,
+            parent,
+            parent
+        };
     }
 }
