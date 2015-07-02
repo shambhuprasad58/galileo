@@ -25,21 +25,24 @@
                 android:layout_height="match_parent"
                 android:text="1"
                 android:textSize="@dimen/activity_number_size"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:id="@+id/TextView1"/>
             <TextView
                 android:layout_width="0dp"
                 android:layout_weight=".33"
                 android:layout_height="match_parent"
                 android:text="2"
                 android:textSize="@dimen/activity_number_size"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:id="@+id/TextView2"/>
             <TextView
                 android:layout_width="0dp"
                 android:layout_weight=".33"
                 android:layout_height="match_parent"
                 android:text="3"
                 android:textSize="@dimen/activity_number_size"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:id="@+id/TextView3"/>
 
         </LinearLayout>
 
@@ -55,7 +58,8 @@
                 android:layout_height="match_parent"
                 android:text="4"
                 android:textSize="@dimen/activity_number_size"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:id="@+id/TextView4"/>
             <TextView
                 android:layout_width="0dp"
                 android:layout_weight=".33"
@@ -70,7 +74,8 @@
                 android:layout_height="match_parent"
                 android:text="6"
                 android:textSize="@dimen/activity_number_size"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:id="@+id/TextView6"/>
 
         </LinearLayout>
 
@@ -86,21 +91,24 @@
                 android:layout_height="match_parent"
                 android:text="7"
                 android:textSize="@dimen/activity_number_size"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:id="@+id/TextView7"/>
             <TextView
                 android:layout_width="0dp"
                 android:layout_weight=".33"
                 android:layout_height="match_parent"
                 android:text="8"
                 android:textSize="@dimen/activity_number_size"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:id="@+id/TextView8"/>
             <TextView
                 android:layout_width="0dp"
                 android:layout_weight=".33"
                 android:layout_height="match_parent"
                 android:text="9"
                 android:textSize="@dimen/activity_number_size"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:id="@+id/TextView9"/>
 
         </LinearLayout>
 
@@ -116,21 +124,24 @@
                 android:layout_height="match_parent"
                 android:text="*"
                 android:textSize="@dimen/activity_number_size"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:id="@+id/TextViewAsterisk"/>
             <TextView
                 android:layout_width="0dp"
                 android:layout_weight=".33"
                 android:layout_height="match_parent"
                 android:text="0"
                 android:textSize="@dimen/activity_number_size"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:id="@+id/TextView0"/>
             <TextView
                 android:layout_width="0dp"
                 android:layout_weight=".33"
                 android:layout_height="match_parent"
                 android:text="#"
                 android:textSize="@dimen/activity_number_size"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:id="@+id/TextViewSharp"/>
 
         </LinearLayout>
     </LinearLayout>
