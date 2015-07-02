@@ -1,7 +1,11 @@
 package com.microsoft.anonymousknights.galileo;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -10,6 +14,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import T9.T9;
@@ -18,8 +23,10 @@ import T9.T9;
 
 public class MainActivity extends AppCompatActivity {
 
-    ConcurrentLinkedQueue<Touch> SenseDataList;
+    ConcurrentLinkedDeque<Touch> SenseDataList;
+    Vibrator vibrator;
 
+    @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,26 +38,31 @@ public class MainActivity extends AppCompatActivity {
 //
 //        setContentView(new GenerateInterface(this).createGridLayout(), relativeLayoutParams);
         setContentView(R.layout.activity_main);
-        SenseDataList = new ConcurrentLinkedQueue<Touch>();
+        SenseDataList = new ConcurrentLinkedDeque<Touch>();
+        vibrator = (Vibrator) getSystemService(this.VIBRATOR_SERVICE);
         LinearLayout baselayout = (LinearLayout) findViewById(R.id.base_layout);
         baselayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                Log.e("Touch : " + motionEvent.getAction(),
+                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN || motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+                    Log.e("Touch : " + motionEvent.getAction(),
                             String.valueOf(motionEvent.getX()) + "x" + String.valueOf(motionEvent.getY()));
+                    SenseDataList.addFirst(new Touch(motionEvent.getX(), motionEvent.getY(), motionEvent.getAction(), System.currentTimeMillis()));
+                }
                 return true;
             }
         });
-        baselayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.e("Click: ", "CLICKEDDDDDDDDD");
-            }
-        });
-	T9 t9 = new T9();
-        t9.clear();
-        int x = t9.filter('3');
-        Log.d("AAAAAAAAAAAAAAAAAAAAA", Integer.toString(x));
+//        baselayout.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Log.e("Click: ", "CLICKEDDDDDDDDD");
+//            }
+//        });
+        new RequestTask().execute();
+//	T9 t9 = new T9();
+//        t9.clear();
+//        int x = t9.filter('3');
+//        Log.d("AAAAAAAAAAAAAAAAAAAAA", Integer.toString(x));
     }
 
     @Override
@@ -77,11 +89,32 @@ public class MainActivity extends AppCompatActivity {
 
     class RequestTask extends AsyncTask<Void, Void, Void> {
 
+        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         @Override
         protected Void doInBackground(Void... v) {
+            Log.d("ASYNC TASK: ", "BACKGROUNDddddddddddddd");
+            long previousClickTime = 0;
+            boolean moved;
+            int currentAppStatus = 0;
             while(true) {
-                if (SenseDataList.peek().type == MotionEvent.ACTION_DOWN) {
-                    ActionIdentifier.IdentifyAction(SenseDataList);
+                if(!SenseDataList.isEmpty()) {
+                    Log.d("ASYNC TASK: ", "LIST NOT EMPTY");
+                    if (SenseDataList.peek().type == MotionEvent.ACTION_UP) {
+                        Log.d("ASYNC TASK: ", "ACTION UP");
+                        moved = false;
+                        Touch end = SenseDataList.getFirst();
+                        Touch start = SenseDataList.getLast();
+                        //if(SenseDataList.size() > 4)
+                        moved = true;
+                        SenseDataList.clear();
+                        ActionIdentifier.IdentifyAction(start, end, previousClickTime, moved, currentAppStatus, vibrator);
+                        previousClickTime = end.timestamp;
+                    }
+                }
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
             //return null;
