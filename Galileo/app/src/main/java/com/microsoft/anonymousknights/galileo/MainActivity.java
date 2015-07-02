@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity{
                     @Override
                     public void onInit(int i) {
                         Log.d("galileo_mytag", "xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-                        mTts.speak("Hello folks, welcome to my little demo on Text To Speech.",
+                        mTts.speak("Hello folks, welcome to galileo. LOCATE 5",
                                 TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
                                 null);
 
@@ -172,9 +172,9 @@ public class MainActivity extends AppCompatActivity{
         @Override
         protected Void doInBackground(Void... v) {
             Log.d("galileo_mytag", "BACKGROUNDddddddddddddd");
-            boolean moved;
+            boolean moved, fiveFoundFlag = false;
             SenseDataList.clear();
-            int currentAppStatus = AppStatus.enteringNumbers;
+            int currentAppStatus = AppStatus.searchingFor5;
             while(true) {
                 if(!SenseDataList.isEmpty()) {
                     Log.d("galileo_mytag", "LIST NOT EMPTY");
@@ -186,8 +186,14 @@ public class MainActivity extends AppCompatActivity{
                         if(SenseDataList.size() > 5)
                             moved = true;
                         SenseDataList.clear();
-                        if(currentAppStatus == AppStatus.searchingFor5)
+                        if(currentAppStatus == AppStatus.searchingFor5) {
                             currentAppStatus = ActionIdentifier.searchingForFive(end, vibrator, mTts);
+                            fiveFoundFlag = false;
+                        }
+                        else if(!fiveFoundFlag)
+                        {
+                            fiveFoundFlag = true;
+                        }
                         else
                             currentAppStatus = ActionIdentifier.IdentifyAction(start, end, moved, currentAppStatus, vibrator, mTts, T9Dictionary, getApplicationContext());
                     }
