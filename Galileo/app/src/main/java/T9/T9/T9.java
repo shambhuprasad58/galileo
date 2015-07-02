@@ -88,7 +88,7 @@ public class T9
                 current = current.getNext();
             }
             //general branch
-            else
+            else if(current.getNext() != null)
             {
                 list = ((NodeList)current.getNext()).getList();
                 for(temp++; temp < 12 && list[temp] == null; temp++);
