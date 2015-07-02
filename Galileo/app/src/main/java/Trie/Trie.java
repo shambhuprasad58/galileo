@@ -38,6 +38,8 @@ public class Trie
                 current.setNextChar(currentChar);
                 //set next node
                 current.setNext(new Node());
+                //update subtree size
+                current.setSubTreeSize(current.getSubTreeSize() + 1);
                 //traverse to it
                 current = current.getNext();
             }
@@ -59,12 +61,16 @@ public class Trie
                 current.setNext(tempNodeList);
                 //indicate no longer singleton node
                 current.setNextChar('\0');
+                //update subtree size
+                current.setSubTreeSize(current.getSubTreeSize() + 1);
                 //traverse to it
                 current = current.getNext();
             }
             //check for singleton node and no need to insert new node
             else if(current.getNextChar() > 0)
             {
+                //update subtree size
+                current.setSubTreeSize(current.getSubTreeSize() + 1);
                 //traverse to it
                 current = current.getNext();
             }
@@ -84,6 +90,8 @@ public class Trie
                     //add back to next ref
                     current.setNext(tempNodeList);
                 }
+                //update subtree size
+                current.setSubTreeSize(current.getSubTreeSize() + 1);
                 //traverse to it
                 current = tempList[currentChar - '0'];
             }
@@ -91,6 +99,8 @@ public class Trie
         //reached end of list
         //add entry
         current.addEntry(content);
+        //update subtree size
+        current.setSubTreeSize(current.getSubTreeSize() + 1);
 
         return true;
     }

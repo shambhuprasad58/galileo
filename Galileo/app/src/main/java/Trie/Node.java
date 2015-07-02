@@ -10,10 +10,21 @@ public class Node
 {
     LinkedList<String> entry;
 
+    public int getSubTreeSize() {
+        return subTreeSize;
+    }
+
+    public void setSubTreeSize(int subTreeSize) {
+        this.subTreeSize = subTreeSize;
+    }
+
+    int subTreeSize;
+
     public Node()
     {
         this.entry = new LinkedList<String>();
         this.nextChar = 0;
+        this.subTreeSize = 0;
     }
 
     public void addEntry(String entry)

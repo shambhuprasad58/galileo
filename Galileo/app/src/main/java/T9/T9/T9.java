@@ -1,40 +1,33 @@
 package T9;
 
+import Trie.Trie;
+import Trie.Node;
+
 /**
  * Created by Administrator on 7/2/2015.
  */
 public class T9
 {
-    int dictionarySize;
-    int[] skipList;
-    String[] dictionary;
+    Trie dictionary;
 
     public T9()
     {
-        dictionarySize = 0;
+        dictionary = new Trie();
     }
 
-    public T9(int dictionarySize)
+    public void addToDictionary(String id, String value)
     {
-        this.dictionarySize = dictionarySize;
-        //allocate skip list
-        skipList = new int[dictionarySize];
-        //allocate dictionary
-        dictionary = new String[dictionarySize];
+        dictionary.insert(id, value);
     }
 
     public void clear()
     {
-        int index;
-        //clear skip list
-        for(index = 0; index < dictionarySize; index++)
-        {
-            skipList[index] = 1;
-        }
+        dictionary.reset();
     }
 
-    public void filter(char key)
+    public int filter(char key)
     {
-
+        Node node = dictionary.filter(key);
+        return node.getSubTreeSize();
     }
 }
