@@ -52,10 +52,15 @@ public class T9
             return null;
         }
 
-        if(current.getNextChar() > 0)
+        while (current != null && current.getNextChar() > 0)
         {
+            //add node content
+            masterList.addAll(current.getEntries());
+            //update current
+            current = current.getNext();
         }
-        else
+
+        if(current != null)
         {
             list = ((NodeList)current.getNext()).getList();
             for(temp = 0; temp < 12 && list[temp] == null; temp++);
