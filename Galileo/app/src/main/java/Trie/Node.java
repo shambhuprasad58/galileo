@@ -21,6 +21,11 @@ public class Node
         this.entry.addLast(entry);
     }
 
+    public LinkedList<String> getEntries()
+    {
+        return entry;
+    }
+
     public char getNextChar() {
         return nextChar;
     }
