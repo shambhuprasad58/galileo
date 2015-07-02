@@ -20,9 +20,15 @@ public class T9
 
     Trie dictionary;
 
+    public String getCurrentString() {
+        return currentString;
+    }
+
+    String currentString;
     public T9()
     {
         dictionary = new Trie();
+        currentString = "";
     }
 
     public void addToDictionary(String id, ContactData value)
@@ -33,10 +39,15 @@ public class T9
     public void clear()
     {
         dictionary.reset();
+        currentString = "";
     }
 
     public int filter(char key)
     {
+        if(key == '\b')
+        {
+            currentString.subSequence(0, currentString.length() - 1);
+        }
         Node node = dictionary.filter(key);
         return node.getSubTreeSize();
     }

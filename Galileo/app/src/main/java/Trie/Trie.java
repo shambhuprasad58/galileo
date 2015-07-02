@@ -18,7 +18,7 @@ public class Trie
 
     public Trie()
     {
-        this.root = new Node();
+        this.root = new Node(null);
         this.head = root;
     }
 
@@ -45,7 +45,7 @@ public class Trie
                 //indicate singleton node
                 current.setNextChar(currentChar);
                 //set next node
-                current.setNext(new Node());
+                current.setNext(new Node(current));
                 //update subtree size
                 current.setSubTreeSize(current.getSubTreeSize() + 1);
                 //traverse to it
@@ -62,7 +62,7 @@ public class Trie
                 //get list
                 tempList = tempNodeList.getList();
                 //insert new node
-                tempList[currentChar - '0'] = new Node();
+                tempList[currentChar - '0'] = new Node(current);
                 //insert old node
                 tempList[current.getNextChar() - '0'] = temporary;
                 //set next nodes
@@ -92,7 +92,7 @@ public class Trie
                 //need to insert new node
                 if(tempList[currentChar - '0'] == null)
                 {
-                    tempList[currentChar - '0'] = new Node();
+                    tempList[currentChar - '0'] = new Node(current);
                     //add to node list
                     tempNodeList.setList(tempList);
                     //add back to next ref
@@ -127,8 +127,16 @@ public class Trie
         }
         else
         {
+            //check for delete
+            if(key == '\b')
+            {
+                if(head != root)
+                {
+                    head = head.getParent();
+                }
+            }
             //check for singleton node
-            if(head.getNextChar() > 0)
+            else if(head.getNextChar() > 0)
             {
                 //traverse
                 if(head.getNextChar() == key)

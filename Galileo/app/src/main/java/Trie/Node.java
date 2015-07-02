@@ -21,8 +21,9 @@ public class Node
 
     int subTreeSize;
 
-    public Node()
+    public Node(Node parent)
     {
+        this.parent = parent;
         this.entry = new LinkedList<ContactData>();
         this.nextChar = 0;
         this.subTreeSize = 0;
@@ -59,4 +60,10 @@ public class Node
     }
 
     Node next;
+
+    public Node getParent() {
+        return parent;
+    }
+
+    Node parent;
 }
