@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -17,14 +18,16 @@ import android.widget.LinearLayout;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import Speech.Speech;
 import T9.T9;
 
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener{
 
     ConcurrentLinkedDeque<Touch> SenseDataList;
     Vibrator vibrator;
+    Speech speech;
 
     @SuppressLint("NewApi")
     @Override
@@ -66,6 +69,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        speech.toEndSpeech();
+        super.onDestroy();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -85,6 +94,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onInit(int status) {
+        Log.d("SPEEEEECH", "INITIALIZINGGGGGGGGGGGG");
+        speech = new Speech(status);
     }
 
     class RequestTask extends AsyncTask<Void, Void, Void> {
@@ -107,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
                         //if(SenseDataList.size() > 4)
                         moved = true;
                         SenseDataList.clear();
-                        ActionIdentifier.IdentifyAction(start, end, previousClickTime, moved, currentAppStatus, vibrator);
+                        ActionIdentifier.IdentifyAction(start, end, previousClickTime, moved, currentAppStatus, vibrator, speech);
                         previousClickTime = end.timestamp;
                     }
                 }

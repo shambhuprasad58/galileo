@@ -3,6 +3,7 @@ package com.microsoft.anonymousknights.galileo;
 import android.annotation.SuppressLint;
 import android.os.Vibrator;
 import android.util.Log;
+import Speech.Speech;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,11 +18,17 @@ public class ActionIdentifier {
     private static final int LongPressThresholdTime = 200;
     private static final int MoveThresholdPos = 200;
     @SuppressLint("NewApi")
-    public static int IdentifyAction(Touch start, Touch end, long previousClickTime, boolean moved, int currentAppStatus, Vibrator vibrator)
+    public static int IdentifyAction(Touch start, Touch end, long previousClickTime, boolean moved, int currentAppStatus, Vibrator vibrator, Speech speech)
     {
         Log.d("ACTION IDENTIFIER: ", "VIBRATION CHECK");
         Vibrate vibrate = new Vibrate(vibrator);
         vibrate.vibrate(4, 200, 50);
+        if(speech != null) {
+            Log.d("SPEECH DEBUG", "SPEECH NOTTTTTTTTTTTT NULL");
+            speech.speakOut("SHHHHHH KOI HAI");
+        }
+        else
+        Log.d("SPEECH DEBUG", "SPEECH NULLLLLLLLLLL");
         if(true)
             return 1;
         if(Math.abs(start.pos_x - end.pos_x) > MoveThresholdPos || Math.abs(start.pos_y - end.pos_y) > MoveThresholdPos)
