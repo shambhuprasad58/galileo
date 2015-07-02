@@ -57,13 +57,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 	T9 t9 = new T9();
+        /*
         t9.addToDictionary("23", "ad");
         t9.addToDictionary("23", "be");
         t9.addToDictionary("24",  "ag");
         t9.addToDictionary("34", "dg");
         t9.clear();
         int x = t9.filter('3');
+
         Log.d("AAAAAAAAAAAAAAAAAAAAA", Integer.toString(x));
+        */
     }
 
     @Override
