@@ -6,6 +6,12 @@ package Trie;
 public class Trie
 {
     Node root;
+
+    public Node getHead()
+    {
+        return head;
+    }
+
     Node head;
 
     public Trie()
