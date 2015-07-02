@@ -44,7 +44,7 @@ public class T9
         Node[] list;
 
         Node current = dictionary.getHead();
-        int temp;
+        int temp = 0;
 
         //empty filter results
         if(current == null)
@@ -52,27 +52,8 @@ public class T9
             return null;
         }
 
-        while (current != null && current.getNextChar() > 0)
-        {
-            //add node content
-            masterList.addAll(current.getEntries());
-            //update current
-            current = current.getNext();
-        }
-
-        if(current != null)
-        {
-            list = ((NodeList)current.getNext()).getList();
-            for(temp = 0; temp < 12 && list[temp] == null; temp++);
-            if (temp < 12)
-            {
-                stack.push(temp);
-                nodeStack.push(current);
-                current = list[temp];
-            }
-        }
+        stack.push(-1);
         nodeStack.push(current);
-
 
         do
         {
@@ -80,15 +61,19 @@ public class T9
             current = nodeStack.pop();
 
             //add node content
-            masterList.addAll(current.getEntries());
+            //masterList.addAll(current.getEntries());
 
             //singleton branch
-            if(current.getNextChar() > 0)
+            while (current != null && current.getNextChar() > 0)
             {
+                //add node content
+                masterList.addAll(current.getEntries());
+                //update current
                 current = current.getNext();
             }
+
             //general branch
-            else
+            if(current != null && current.getNext() != null)
             {
                 list = ((NodeList)current.getNext()).getList();
                 for(temp++; temp < 12 && list[temp] == null; temp++);
@@ -96,9 +81,22 @@ public class T9
                 {
                     stack.push(temp);
                     nodeStack.push(current);
-                    current = list[temp];
+                    //current = list[temp];
+                    stack.push(-1);
+                    nodeStack.push(list[temp]);
+                }
+                else
+                {
+                    //add node content
+                    masterList.addAll(current.getEntries());
                 }
             }
+            else if(current != null)
+            {
+                //add node content
+                masterList.addAll(current.getEntries());
+            }
+
         }while(!stack.isEmpty());
 
         return masterList;
