@@ -64,7 +64,7 @@ public class Trie
                 //update subtree size
                 current.setSubTreeSize(current.getSubTreeSize() + 1);
                 //traverse to it
-                current = current.getNext();
+                current = tempList[currentChar - '0'];
             }
             //check for singleton node and no need to insert new node
             else if(current.getNextChar() > 0)
