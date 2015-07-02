@@ -1,5 +1,6 @@
 package T9;
 
+import Contacts.ContactData;
 import Trie.Trie;
 import Trie.Node;
 
@@ -15,7 +16,7 @@ public class T9
         dictionary = new Trie();
     }
 
-    public void addToDictionary(String id, String value)
+    public void addToDictionary(String id, ContactData value)
     {
         dictionary.insert(id, value);
     }

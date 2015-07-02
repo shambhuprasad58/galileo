@@ -2,13 +2,14 @@ package Trie;
 
 import java.util.LinkedList;
 import java.util.List;
-
+import Contacts.ContactData;
 /**
  * Created by Administrator on 7/2/2015.
  */
 public class Node
 {
-    LinkedList<String> entry;
+    //String->Ref
+    LinkedList<ContactData> entry;
 
     public int getSubTreeSize() {
         return subTreeSize;
@@ -22,17 +23,18 @@ public class Node
 
     public Node()
     {
-        this.entry = new LinkedList<String>();
+        this.entry = new LinkedList<ContactData>();
         this.nextChar = 0;
         this.subTreeSize = 0;
     }
 
-    public void addEntry(String entry)
+    //String->Ref
+    public void addEntry(ContactData entry)
     {
         this.entry.addLast(entry);
     }
 
-    public LinkedList<String> getEntries()
+    public LinkedList<ContactData> getEntries()
     {
         return entry;
     }
