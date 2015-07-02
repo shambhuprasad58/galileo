@@ -21,6 +21,8 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.OperationApplicationException;
 import Contacts.ContactData;
+import T9.T9;
+
 /**
  * Created by Administrator on 7/2/2015.
  */
@@ -34,7 +36,7 @@ public class Contacts{
         context = cx;
     }
 
-     public List <ContactData> fetchList()
+     public List <ContactData> fetchList(T9 t9)
      {
          Cursor cursor = null;
          List <ContactData> PhoneList = new ArrayList<ContactData>();
@@ -49,7 +51,7 @@ public class Contacts{
                  String idContact = cursor.getString(contactIdIdx);
                  String name = cursor.getString(nameIdx);
                  String phoneNumber = cursor.getString(phoneNumberIdx);
-                 PhoneList.add(new ContactData(name,phoneNumber));
+                 PhoneList.add(new ContactData(name,phoneNumber,t9));
 
                  //...
              } while (cursor.moveToNext());
