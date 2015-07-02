@@ -1,5 +1,7 @@
 package Trie;
 
+import Contacts.ContactData;
+
 /**
  * Created by Administrator on 7/2/2015.
  */
@@ -20,7 +22,7 @@ public class Trie
         this.head = root;
     }
 
-    public boolean insert(String entry, String content)
+    public boolean insert(String entry, ContactData content)
     {
         //current node
         Node current = root;
