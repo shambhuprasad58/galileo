@@ -67,6 +67,11 @@ public class MainActivity extends AppCompatActivity{
                 if(mTts != null)
                 {
                     mTts.speak("Closing Application. Thank You.", TextToSpeech.QUEUE_FLUSH, null);
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
                 finish();
                 System.exit(0);
