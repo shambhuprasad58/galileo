@@ -2,6 +2,7 @@ package com.microsoft.anonymousknights.galileo;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 
 import java.util.concurrent.ConcurrentLinkedDeque;
 
+import Shaker.ShakeListener;
 import T9.T9;
 import  Contacts.*;
 
@@ -28,6 +30,7 @@ public class MainActivity extends AppCompatActivity{
     Vibrator vibrator;
     TextToSpeech mTts;
     T9 T9Dictionary;
+    ShakeListener mShaker;
 
     @SuppressLint("NewApi")
     @Override
@@ -55,9 +58,37 @@ public class MainActivity extends AppCompatActivity{
                 return true;
             }
         });
-        Intent checkIntent = new Intent();
+
+        mShaker = new ShakeListener(this);
+        mShaker.setOnShakeListener(new ShakeListener.OnShakeListener () {
+            public void onShake()
+            {
+                //vibrator.vibrate(100);
+                if(mTts != null)
+                {
+                    mTts.speak("Closing Application. Thank You.", TextToSpeech.QUEUE_FLUSH, null);
+                }
+                finish();
+                System.exit(0);
+            }
+        });
+
+    Intent checkIntent = new Intent();
         checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
         startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+    }
+
+    @Override
+    public void onResume()
+    {
+        mShaker.resume();
+        super.onResume();
+    }
+    @Override
+    public void onPause()
+    {
+        mShaker.pause();
+        super.onPause();
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data)

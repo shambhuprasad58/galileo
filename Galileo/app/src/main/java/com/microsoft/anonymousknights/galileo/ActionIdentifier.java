@@ -20,6 +20,21 @@ import Vibrate.Vibrate;
  * Created by sam on 7/2/2015.
  */
 public class ActionIdentifier {
+    static String[] digit=
+    {
+            "0",
+            "1",
+        "2 A B C",
+            "3 D E F",
+            "4 G H I",
+            "5 J K L",
+            "6 M N O",
+            "7 P Q R S",
+            "8 T U V",
+            "9 W X Y Z",
+            "STAR",
+            "HASH"
+    };
     private static final int LongPressThresholdTime = 200;
     private static final int MoveThresholdPos = 200;
     private static LinkedList<ContactData> list;
@@ -40,16 +55,18 @@ public class ActionIdentifier {
             Log.d("galileo_mytag ", "MOVE DIRECTION " + moveDirection);
             switch(moveDirection)
             {
-                case 1: //UP: start search for 5
-                    currentAppStatus = AppStatus.searchingFor5;
-                    break;
-                case 2: //DOWN: delete all data entered
-                    Log.d("galileo_mytag ", "SWIPE DOWN");
+                case 1: //DOWN: delete all data entered
+                    Log.d("galileo_mytag ", "SWIPE UP");
+                    speech.speak("DELETED ALL INPUT", TextToSpeech.QUEUE_FLUSH, null);
                     //       Call("09800160757", context);
                     if(currentAppStatus != AppStatus.searchingFor5) {
                         currentAppStatus = AppStatus.enteringNumbers;
                         T9Dictioary.clear();
                     }
+                    break;
+                case 2: //UP: start search for 5
+                    speech.speak("LOCATE 5", TextToSpeech.QUEUE_FLUSH, null);
+                    currentAppStatus = AppStatus.searchingFor5;
                     break;
                 case 3: //LEFT: delete one last digit
                     if(currentAppStatus != AppStatus.searchingFor5)
@@ -57,10 +74,7 @@ public class ActionIdentifier {
                         //Delete last digit
                         //speech.speak("BACK", TextToSpeech.QUEUE_FLUSH, null);
                         int count = T9Dictioary.filter('\b');
-                        if(count == -1)
-                            speech.speak("Soory", TextToSpeech.QUEUE_FLUSH, null);
-                        else
-                            speech.speak(count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
+                        speech.speak("GOING BACK. " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
                         //T9 update
                     }
                     break;
@@ -69,7 +83,13 @@ public class ActionIdentifier {
                     if(currentAppStatus != AppStatus.searchingFor5) {
                         if (T9Dictioary.getDictionary().getHead() == null || T9Dictioary.getDictionary().getHead().getSubTreeSize() == 0) {
                             speech.speak("NO CONTACT FOUND. CALLING DIALED NUMBER", TextToSpeech.QUEUE_FLUSH, null);
-                            Call(T9Dictioary.getCurrentString(), context);
+                            String number = T9Dictioary.getCurrentString();
+                            T9Dictioary.clear();
+                            Log.d("galileo_mytag", "CONTACT NUMBER BEFORE:::: " + number);
+                            number = (number.replace(':', '*'));
+                            number = (number.replace(';', '#'));
+                            Log.d("galileo_mytag", "CONTACT NUMBER AFTER:::: " + number);
+                            Call(number, context);
                         }
                         else if (T9Dictioary.getDictionary().getHead().getSubTreeSize() < 9) {
                             list = T9Dictioary.traverseDictionary();
@@ -94,13 +114,27 @@ public class ActionIdentifier {
                 //Next number
                 Log.d("galileo_mytag ", "TAPPPPPEDDDD ");
                 int count = T9Dictioary.filter(clickedNumber);
-                speech.speak(count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
+                speech.speak(digit[clickedNumber-'0'] + ". " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
             }
             else if(currentAppStatus == AppStatus.announcingResults)
             {
                 //Call
                 Log.d("galileo_mytag ", "ANNOUNCING RESULTS CALLING");
-                Call(list.get(clickedNumber-'0'-1).getNumber(), context);
+                T9Dictioary.clear();
+                ContactData contact = list.get(clickedNumber - '0' - 1);
+                list.clear();
+                speech.speak("CALLING " + contact.getName(), TextToSpeech.QUEUE_FLUSH, null);
+                currentAppStatus = AppStatus.enteringNumbers;
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                Log.d("galileo_mytag", "CONTACT NUMBER BEFORE:::: " + contact.getNumber());
+                contact.setNumber(contact.getNumber().replace(':', '*'));
+                contact.setNumber(contact.getNumber().replace(';', '#'));
+                Log.d("galileo_mytag", "CONTACT NUMBER AFTER:::: " + contact.getNumber());
+                Call(contact.getNumber(), context);
             }
         }
 //        else
