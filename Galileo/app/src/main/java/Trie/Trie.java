@@ -7,6 +7,11 @@ import Contacts.ContactData;
  */
 public class Trie
 {
+    public Node lastHead;
+    public Node getRoot() {
+        return root;
+    }
+
     Node root;
 
     public Node getHead()
@@ -20,6 +25,7 @@ public class Trie
     {
         this.root = new Node(null);
         this.head = root;
+        this.lastHead = null;
     }
 
     public boolean insert(String entry, ContactData content)
@@ -121,7 +127,11 @@ public class Trie
     public Node filter(char key)
     {
         Node[] nodeList;
-        if(head == null)
+        if(key == '\b' && head == null)
+        {
+            head = lastHead;
+        }
+        else if(head == null)
         {
             return  head;
         }
@@ -141,16 +151,19 @@ public class Trie
                 //traverse
                 if(head.getNextChar() == key)
                 {
+                    lastHead = head;
                     head = head.getNext();
                 }
                 else
                 {
+                    lastHead = head;
                     head = null;
                 }
             }
             else
             {
                 nodeList = ((NodeList)head.getNext()).getList();
+                lastHead = head;
                 head = nodeList[key - '0'];
             }
         }

@@ -44,6 +44,10 @@ public class T9
 
     public int filter(char key)
     {
+        if(dictionary.getRoot().getNext() == null)
+        {
+            return 0;
+        }
         if(key == '\b' && currentString.length() == 0)
         {
             return dictionary.getHead().getSubTreeSize();
