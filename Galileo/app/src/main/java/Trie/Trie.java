@@ -148,7 +148,10 @@ public class Trie
             if(key == '\b' && lengthCount == maxCount - 1)
             {
                 if(head == null)
+                {
                     head = lastHead;
+                    maxCount = lengthCount;
+                }
             }
             else
             {
