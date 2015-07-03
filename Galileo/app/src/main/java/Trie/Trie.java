@@ -8,6 +8,8 @@ import Contacts.ContactData;
 public class Trie
 {
     public Node lastHead;
+    public int lengthCount;
+    int maxCount;
     public Node getRoot() {
         return root;
     }
@@ -26,6 +28,8 @@ public class Trie
         this.root = new Node(null);
         this.head = root;
         this.lastHead = null;
+        lengthCount = 0;
+        maxCount = 0;
     }
 
     public boolean insert(String entry, ContactData content)
@@ -122,21 +126,45 @@ public class Trie
     public void reset()
     {
         head = root;
+        maxCount = 0;
+        lengthCount = 0;
     }
 
     public Node filter(char key)
     {
         Node[] nodeList;
-        if(key == '\b' && head == null)
+
+        if(key == '\b')
         {
-            head = lastHead;
-        }
-        else if(head == null)
-        {
-            return  head;
+            lengthCount--;
         }
         else
         {
+            lengthCount++;
+        }
+
+        if(head == null)
+        {
+            if(key == '\b' && lengthCount == maxCount - 1)
+            {
+                if(head == null)
+                    head = lastHead;
+            }
+            else
+            {
+                return head;
+            }
+        }
+        else
+        {
+            if(key == '\b')
+            {
+                maxCount--;
+            }
+            else
+            {
+                maxCount++;
+            }
             //check for delete
             if(key == '\b')
             {
