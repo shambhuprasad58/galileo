@@ -12,6 +12,7 @@ import android.util.Log;
 import Contacts.ContactData;
 
 import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 import T9.T9;
 import Vibrate.Vibrate;
@@ -110,6 +111,25 @@ public class ActionIdentifier {
 //            }
 //        }
         return currentAppStatus;
+    }
+
+    public static int IdentifyAction(Touch start, Touch end)
+    {
+        Log.d("IdentifyAction: ", "ENTEREDDDDDDDDDD");
+        if(Math.abs(start.pos_x - end.pos_x) > MoveThresholdPos || Math.abs(start.pos_y - end.pos_y) > MoveThresholdPos)
+        {
+            Log.d("IdentifyAction: ", "MOVEEEEEEEEEEEE");
+            //Move Action
+            return getMoveDirection(start, end);
+
+        }
+        else if(start.timestamp - end.timestamp < LongPressThresholdTime)
+        {
+            //Single Click
+            return getClickedNumber(start, end);
+        }
+        return -1;
+        //return currentAppStatus;
     }
 
     public static int getMoveDirection(Touch start, Touch end)
