@@ -23,11 +23,8 @@ public class Node
 
     public Node()
     {
-        this.entry = new LinkedList<ContactData>();
-        this.nextChar = 0;
-        this.subTreeSize = 0;
+        this(null);
     }
-
     public Node(Node parent)
     {
         this.parent = parent;
@@ -70,6 +67,10 @@ public class Node
 
     public Node getParent() {
         return parent;
+    }
+
+    public void setParent(Node parent) {
+        this.parent = parent;
     }
 
     Node parent;

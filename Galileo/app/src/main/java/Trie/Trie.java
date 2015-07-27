@@ -7,6 +7,13 @@ import Contacts.ContactData;
  */
 public class Trie
 {
+    public Node lastHead;
+    public int lengthCount;
+    int maxCount;
+    public Node getRoot() {
+        return root;
+    }
+
     Node root;
 
     public Node getHead()
@@ -20,6 +27,9 @@ public class Trie
     {
         this.root = new Node(null);
         this.head = root;
+        this.lastHead = null;
+        lengthCount = 0;
+        maxCount = 0;
     }
 
     public boolean insert(String entry, ContactData content)
@@ -58,7 +68,7 @@ public class Trie
                 temporary = current.getNext();
 
                 //create node list
-                tempNodeList = new NodeList(current);
+                tempNodeList = new NodeList();
                 //get list
                 tempList = tempNodeList.getList();
                 //insert new node
@@ -116,17 +126,48 @@ public class Trie
     public void reset()
     {
         head = root;
+        maxCount = 0;
+        lengthCount = 0;
     }
 
     public Node filter(char key)
     {
         Node[] nodeList;
-        if(head == null)
+
+        if(key == '\b')
         {
-            return  head;
+            lengthCount--;
         }
         else
         {
+            lengthCount++;
+        }
+
+        if(head == null)
+        {
+            if(key == '\b' && lengthCount == maxCount - 1)
+            {
+                if(head == null)
+                {
+                    head = lastHead;
+                    maxCount = lengthCount;
+                }
+            }
+            else
+            {
+                return head;
+            }
+        }
+        else
+        {
+            if(key == '\b')
+            {
+                maxCount--;
+            }
+            else
+            {
+                maxCount++;
+            }
             //check for delete
             if(key == '\b')
             {
@@ -141,16 +182,19 @@ public class Trie
                 //traverse
                 if(head.getNextChar() == key)
                 {
+                    lastHead = head;
                     head = head.getNext();
                 }
                 else
                 {
+                    lastHead = head;
                     head = null;
                 }
             }
             else
             {
                 nodeList = ((NodeList)head.getNext()).getList();
+                lastHead = head;
                 head = nodeList[key - '0'];
             }
         }

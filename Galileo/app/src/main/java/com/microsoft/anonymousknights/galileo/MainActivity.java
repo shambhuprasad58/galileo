@@ -2,6 +2,7 @@ package com.microsoft.anonymousknights.galileo;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -17,7 +18,9 @@ import android.widget.TextView;
 
 import java.util.concurrent.ConcurrentLinkedDeque;
 
+import Shaker.ShakeListener;
 import T9.T9;
+import  Contacts.*;
 
 
 public class MainActivity extends AppCompatActivity{
@@ -27,6 +30,7 @@ public class MainActivity extends AppCompatActivity{
     Vibrator vibrator;
     TextToSpeech mTts;
     T9 T9Dictionary;
+    ShakeListener mShaker;
 
     @SuppressLint("NewApi")
     @Override
@@ -37,6 +41,9 @@ public class MainActivity extends AppCompatActivity{
         SenseDataList = new ConcurrentLinkedDeque<Touch>();
         vibrator = (Vibrator) getSystemService(this.VIBRATOR_SERVICE);
         T9Dictionary = new T9();
+        Contacts allPhoneContacts = new Contacts(this);
+        Log.d("galileo_mytag", "Contacts class created");
+        allPhoneContacts.fetchList(T9Dictionary);
         LinearLayout baselayout = (LinearLayout) findViewById(R.id.base_layout);
         baselayout.getX();
 
@@ -44,16 +51,49 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_DOWN || motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
-                    Log.e("Touch : " + motionEvent.getAction(),
+                    Log.e("galileo_mytag" + motionEvent.getAction(),
                             String.valueOf(motionEvent.getX()) + "x" + String.valueOf(motionEvent.getY()) + "xxxx" + motionEvent.getRawX() + "x" + motionEvent.getRawY());
                     SenseDataList.addFirst(new Touch(motionEvent.getRawX(), motionEvent.getRawY(), motionEvent.getAction(), System.currentTimeMillis()));
                 }
                 return true;
             }
         });
-        Intent checkIntent = new Intent();
+
+        mShaker = new ShakeListener(this);
+        mShaker.setOnShakeListener(new ShakeListener.OnShakeListener () {
+            public void onShake()
+            {
+                //vibrator.vibrate(100);
+                if(mTts != null)
+                {
+                    mTts.speak("Closing Application. Thank You.", TextToSpeech.QUEUE_FLUSH, null);
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                finish();
+                System.exit(0);
+            }
+        });
+
+    Intent checkIntent = new Intent();
         checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
         startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+    }
+
+    @Override
+    public void onResume()
+    {
+        mShaker.resume();
+        super.onResume();
+    }
+    @Override
+    public void onPause()
+    {
+        mShaker.pause();
+        super.onPause();
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -67,8 +107,8 @@ public class MainActivity extends AppCompatActivity{
                 mTts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
                     @Override
                     public void onInit(int i) {
-                        Log.d("xxxxxxxxxxx", "xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-                        mTts.speak("Hello folks, welcome to my little demo on Text To Speech.",
+                        Log.d("galileo_mytag", "xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+                        mTts.speak("Hello folks, welcome to galileo. LOCATE 5",
                                 TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
                                 null);
 
@@ -154,7 +194,7 @@ public class MainActivity extends AppCompatActivity{
         AppConstants.TEXTVIEW_SHARP_POSITION_X = location[0];
         AppConstants.TEXTVIEW_SHARP_POSITION_Y = location[1];
 
-        Log.d("TEXTVIEW5 POSITION: ", AppConstants.TEXTVIEW5_POSITION_X + "--------------" + AppConstants.TEXTVIEW5_POSITION_Y);
+        Log.d("galileo_mytag", AppConstants.TEXTVIEW5_POSITION_X + "--------------" + AppConstants.TEXTVIEW5_POSITION_Y);
     }
 
     public void setAppConstantsPositions()
@@ -167,23 +207,29 @@ public class MainActivity extends AppCompatActivity{
         @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         @Override
         protected Void doInBackground(Void... v) {
-            Log.d("ASYNC TASK: ", "BACKGROUNDddddddddddddd");
-            boolean moved;
+            Log.d("galileo_mytag", "BACKGROUNDddddddddddddd");
+            boolean moved, fiveFoundFlag = false;
             SenseDataList.clear();
-            int currentAppStatus = AppStatus.enteringNumbers;
+            int currentAppStatus = AppStatus.searchingFor5;
             while(true) {
                 if(!SenseDataList.isEmpty()) {
-                    Log.d("ASYNC TASK: ", "LIST NOT EMPTY");
-                    if (SenseDataList.peek().type == MotionEvent.ACTION_UP) {
-                        Log.d("ASYNC TASK: ", "ACTION UP");
+                    Log.d("galileo_mytag", "LIST NOT EMPTY");
+                    if (SenseDataList.peek().type == MotionEvent.ACTION_UP || currentAppStatus == AppStatus.searchingFor5) {
+                        Log.d("galileo_mytag", "ACTION UP");
                         moved = false;
                         Touch end = SenseDataList.getFirst();
                         Touch start = SenseDataList.getLast();
                         if(SenseDataList.size() > 5)
                             moved = true;
                         SenseDataList.clear();
-                        if(currentAppStatus == AppStatus.searchingFor5)
+                        if(currentAppStatus == AppStatus.searchingFor5) {
                             currentAppStatus = ActionIdentifier.searchingForFive(end, vibrator, mTts);
+                            fiveFoundFlag = false;
+                        }
+                        else if(!fiveFoundFlag)
+                        {
+                            fiveFoundFlag = true;
+                        }
                         else
                             currentAppStatus = ActionIdentifier.IdentifyAction(start, end, moved, currentAppStatus, vibrator, mTts, T9Dictionary, getApplicationContext());
                     }

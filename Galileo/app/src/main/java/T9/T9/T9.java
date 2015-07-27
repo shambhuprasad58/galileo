@@ -44,11 +44,25 @@ public class T9
 
     public int filter(char key)
     {
+        if(dictionary.getRoot().getNext() == null)
+        {
+            return 0;
+        }
+        if(key == '\b' && currentString.length() == 0)
+        {
+            return dictionary.getHead().getSubTreeSize();
+        }
         if(key == '\b')
         {
-            currentString.subSequence(0, currentString.length() - 1);
+            currentString = currentString.subSequence(0, currentString.length() - 1).toString();
+        }
+        else
+        {
+            currentString = currentString + key;
         }
         Node node = dictionary.filter(key);
+        if(node == null)
+            return 0;
         return node.getSubTreeSize();
     }
     public LinkedList<ContactData> traverseDictionary()
