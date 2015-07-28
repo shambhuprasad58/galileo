@@ -1,17 +1,23 @@
 package Contacts;
 
 import android.util.Log;
+
+import java.io.Serializable;
+
 import T9.*;
 /**
  * Created by Administrator on 7/2/2015.
  */
 
-public class ContactData {
+public class ContactData implements Serializable
+{
     String name;
     String number;
+    /*
     String name_t9format;
     String number_t9format;
-
+    */
+    /*
     public String getNumber_t9format() {
         return number_t9format;
     }
@@ -19,9 +25,9 @@ public class ContactData {
     public void setNumber_t9format(String number_t9format) {
         this.number_t9format = number_t9format;
     }
+    */
 
-
-
+    /*
     public String getName_t9format() {
         return name_t9format;
     }
@@ -29,7 +35,7 @@ public class ContactData {
     public void setName_t9format(String name_t9format) {
         this.name_t9format = name_t9format;
     }
-
+    */
 
 
 
@@ -61,7 +67,7 @@ public class ContactData {
         Log.d("---Contact Indo:", name);
         Log.d("---Contact Indo:", number);
 
-        name_t9format = "";
+        String name_t9format = "";
         int nameLen = name.length();
         for(int i=0;i<nameLen;i++)
         {
@@ -125,16 +131,17 @@ public class ContactData {
         }
         t9.addToDictionary(name_t9format, this);
 
-        //now for number
-        number_t9format = "";
-        int numberLen = number.length();
-        for(int i=0;i<numberLen;i++)
-        {
-            if(number.toCharArray()[i] < '0' | number.toCharArray()[i] > '9')
-                continue;
-            number_t9format += number.toCharArray()[i];
+        if(number != null) {
+            //now for number
+            String number_t9format = "";
+            int numberLen = number.length();
+            for (int i = 0; i < numberLen; i++) {
+                if (number.toCharArray()[i] < '0' | number.toCharArray()[i] > '9')
+                    continue;
+                number_t9format += number.toCharArray()[i];
+            }
+            t9.addToDictionary(number_t9format, this);
         }
-        t9.addToDictionary(number_t9format, this);
 
     }
 

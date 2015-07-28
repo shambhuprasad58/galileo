@@ -1,12 +1,13 @@
 package Trie;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import Contacts.ContactData;
 /**
  * Created by Administrator on 7/2/2015.
  */
-public class Node
+public class Node implements Serializable
 {
     //String->Ref
     LinkedList<ContactData> entry;

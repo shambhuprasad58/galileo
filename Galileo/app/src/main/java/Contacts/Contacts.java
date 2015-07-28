@@ -11,6 +11,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.io.Closeable;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -28,7 +29,8 @@ import T9.T9;
  */
 //
 
-public class Contacts{
+public class Contacts implements Serializable
+{
 
     //public
     Context context;

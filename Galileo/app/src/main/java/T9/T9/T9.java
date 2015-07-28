@@ -1,5 +1,6 @@
 package T9;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Stack;
@@ -12,7 +13,7 @@ import Trie.NodeList;
 /**
  * Created by Administrator on 7/2/2015.
  */
-public class T9
+public class T9 implements Serializable
 {
     public Trie getDictionary() {
         return dictionary;
