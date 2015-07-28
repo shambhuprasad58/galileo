@@ -34,6 +34,7 @@ public class AppConstants {
 */
     public static float TEXTVIEW_WIDTH;
     public static float TEXTVIEW_HEIGHT;
+    public static float MIN_KEY_RADIUS;
 
     public static final int T9Mode = 1;
     public static final int EnglishMode = 2;

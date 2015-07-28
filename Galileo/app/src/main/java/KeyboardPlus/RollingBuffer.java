@@ -8,6 +8,11 @@ import java.util.Vector;
 public class RollingBuffer {
     double xBuffer[];
     double yBuffer[];
+
+    public int getCount() {
+        return count;
+    }
+
     int count;
 
     public double getxMean() {
