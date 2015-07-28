@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import Shaker.ShakeListener;
 import T9.T9;
 import  Contacts.*;
-
+import KeyboardPlus.*;
 
 public class MainActivity extends AppCompatActivity{
 
@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity{
     T9 T9Dictionary;
     T9 wordDictionary;
     ShakeListener mShaker;
+    
 
     @SuppressLint("NewApi")
     @Override

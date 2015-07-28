@@ -1,5 +1,6 @@
 package KeyboardPlus;
 
+import com.microsoft.anonymousknights.galileo.AppConstants;
 import com.microsoft.anonymousknights.galileo.MainActivity;
 import com.microsoft.anonymousknights.galileo.Touch;
 
@@ -60,7 +61,12 @@ public class Keyboard
 
             if(probability < 0)
             {
-                return -1;
+                for (int j = 0; i < key.length; i++)
+                {
+                    if(touch.pos_x > AppConstants.TEXTVIEW_POSITION_X[j] && touch.pos_y > AppConstants.TEXTVIEW_POSITION_Y[j] && touch.pos_x < (AppConstants.TEXTVIEW_POSITION_X[j] + AppConstants.TEXTVIEW_WIDTH) && touch.pos_y < (AppConstants.TEXTVIEW_POSITION_Y[j] + AppConstants.TEXTVIEW_WIDTH))
+                        return j;
+                }
+                return 11;
             }
 
             if(probability > maxProbability)
