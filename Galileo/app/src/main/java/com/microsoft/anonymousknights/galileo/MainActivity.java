@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity{
     T9 T9Dictionary;
     T9 wordDictionary;
     ShakeListener mShaker;
-    
+
 
     @SuppressLint("NewApi")
     @Override
@@ -224,65 +224,65 @@ public class MainActivity extends AppCompatActivity{
 
         textView = (TextView) findViewById(R.id.TextView1);
         textView.getLocationOnScreen(location);
-        AppConstants.TEXTVIEW1_POSITION_X = location[0];
-        AppConstants.TEXTVIEW1_POSITION_Y = location[1];
+        AppConstants.TEXTVIEW_POSITION_X[1] = location[0];
+        AppConstants.TEXTVIEW_POSITION_Y[1] = location[1];
 
         textView = (TextView) findViewById(R.id.TextView2);
         textView.getLocationOnScreen(location);
-        AppConstants.TEXTVIEW2_POSITION_X = location[0];
-        AppConstants.TEXTVIEW2_POSITION_Y = location[1];
+        AppConstants.TEXTVIEW_POSITION_X[2] = location[0];
+        AppConstants.TEXTVIEW_POSITION_Y[2] = location[1];
 
         textView = (TextView) findViewById(R.id.TextView3);
         textView.getLocationOnScreen(location);
-        AppConstants.TEXTVIEW3_POSITION_X = location[0];
-        AppConstants.TEXTVIEW3_POSITION_Y = location[1];
+        AppConstants.TEXTVIEW_POSITION_X[3] = location[0];
+        AppConstants.TEXTVIEW_POSITION_Y[3] = location[1];
 
         textView = (TextView) findViewById(R.id.TextView4);
         textView.getLocationOnScreen(location);
-        AppConstants.TEXTVIEW4_POSITION_X = location[0];
-        AppConstants.TEXTVIEW4_POSITION_Y = location[1];
+        AppConstants.TEXTVIEW_POSITION_X[4] = location[0];
+        AppConstants.TEXTVIEW_POSITION_Y[4] = location[1];
 
         textView = (TextView) findViewById(R.id.TextView5);
         textView.getLocationOnScreen(location);
-        AppConstants.TEXTVIEW5_POSITION_X = location[0];
-        AppConstants.TEXTVIEW5_POSITION_Y = location[1];
+        AppConstants.TEXTVIEW_POSITION_X[5] = location[0];
+        AppConstants.TEXTVIEW_POSITION_Y[5] = location[1];
 
         textView = (TextView) findViewById(R.id.TextView6);
         textView.getLocationOnScreen(location);
-        AppConstants.TEXTVIEW6_POSITION_X = location[0];
-        AppConstants.TEXTVIEW6_POSITION_Y = location[1];
+        AppConstants.TEXTVIEW_POSITION_X[6] = location[0];
+        AppConstants.TEXTVIEW_POSITION_Y[6] = location[1];
 
         textView = (TextView) findViewById(R.id.TextView7);
         textView.getLocationOnScreen(location);
-        AppConstants.TEXTVIEW7_POSITION_X = location[0];
-        AppConstants.TEXTVIEW7_POSITION_Y = location[1];
+        AppConstants.TEXTVIEW_POSITION_X[7] = location[0];
+        AppConstants.TEXTVIEW_POSITION_Y[7] = location[1];
 
         textView = (TextView) findViewById(R.id.TextView8);
         textView.getLocationOnScreen(location);
-        AppConstants.TEXTVIEW8_POSITION_X = location[0];
-        AppConstants.TEXTVIEW8_POSITION_Y = location[1];
+        AppConstants.TEXTVIEW_POSITION_X[8] = location[0];
+        AppConstants.TEXTVIEW_POSITION_Y[8] = location[1];
 
         textView = (TextView) findViewById(R.id.TextView9);
         textView.getLocationOnScreen(location);
-        AppConstants.TEXTVIEW9_POSITION_X = location[0];
-        AppConstants.TEXTVIEW9_POSITION_Y = location[1];
+        AppConstants.TEXTVIEW_POSITION_X[9] = location[0];
+        AppConstants.TEXTVIEW_POSITION_Y[9] = location[1];
 
         textView = (TextView) findViewById(R.id.TextViewAsterisk);
         textView.getLocationOnScreen(location);
-        AppConstants.TEXTVIEW_ASHTERISK_POSITION_X = location[0];
-        AppConstants.TEXTVIEW_ASHTERISK_POSITION_Y = location[1];
+        AppConstants.TEXTVIEW_POSITION_X[10] = location[0];
+        AppConstants.TEXTVIEW_POSITION_X[10] = location[1];
 
         textView = (TextView) findViewById(R.id.TextView0);
         textView.getLocationOnScreen(location);
-        AppConstants.TEXTVIEW0_POSITION_X = location[0];
-        AppConstants.TEXTVIEW0_POSITION_Y = location[1];
+        AppConstants.TEXTVIEW_POSITION_X[0] = location[0];
+        AppConstants.TEXTVIEW_POSITION_Y[0] = location[1];
 
         textView = (TextView) findViewById(R.id.TextViewSharp);
         textView.getLocationOnScreen(location);
-        AppConstants.TEXTVIEW_SHARP_POSITION_X = location[0];
-        AppConstants.TEXTVIEW_SHARP_POSITION_Y = location[1];
+        AppConstants.TEXTVIEW_POSITION_X[11] = location[0];
+        AppConstants.TEXTVIEW_POSITION_X[11] = location[1];
 
-        Log.d("galileo_mytag", AppConstants.TEXTVIEW5_POSITION_X + "--------------" + AppConstants.TEXTVIEW5_POSITION_Y);
+        Log.d("galileo_mytag", AppConstants.TEXTVIEW_POSITION_X[5] + "--------------" + AppConstants.TEXTVIEW_POSITION_Y[5]);
     }
 
     public void setAppConstantsPositions()

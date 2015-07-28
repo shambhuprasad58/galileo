@@ -9,9 +9,20 @@ import com.microsoft.anonymousknights.galileo.Touch;
  */
 public class Keyboard
 {
-    public RollingBuffer getKey(int i)
+    public Touch getKey(int i)
     {
-        return key[i];
+        Touch t = new Touch();
+        if(key[i].count >= 1)
+        {
+            t.pos_x = key[i].getxMean();
+            t.pos_y = key[i].getyMean();
+        }
+        else
+        {
+            t.pos_x = AppConstants.TEXTVIEW_POSITION_X[i];
+            t.pos_y = AppConstants.TEXTVIEW_POSITION_Y[i];
+        }
+        return t;
     }
 
     RollingBuffer key[];
