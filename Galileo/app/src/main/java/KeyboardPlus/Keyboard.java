@@ -4,10 +4,12 @@ import com.microsoft.anonymousknights.galileo.AppConstants;
 import com.microsoft.anonymousknights.galileo.MainActivity;
 import com.microsoft.anonymousknights.galileo.Touch;
 
+import java.io.Serializable;
+
 /**
  * Created by arnabmi on 7/28/2015.
  */
-public class Keyboard
+public class Keyboard implements Serializable
 {
     static int minPresses = 50;
     public Touch getKey(int i)

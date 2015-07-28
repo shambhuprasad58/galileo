@@ -1,11 +1,12 @@
 package KeyboardPlus;
 
+import java.io.Serializable;
 import java.util.Vector;
 
 /**
  * Created by arnabmi on 7/28/2015.
  */
-public class RollingBuffer {
+public class RollingBuffer implements Serializable{
     double xBuffer[];
     double yBuffer[];
 

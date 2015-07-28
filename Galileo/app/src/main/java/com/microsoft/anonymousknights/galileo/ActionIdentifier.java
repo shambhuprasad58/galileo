@@ -84,47 +84,51 @@ public class ActionIdentifier {
 
     public static void searchingForFive(Touch point, Vibrator vibrator, TextToSpeech speech)
     {
-        if(point.pos_x > (AppConstants.TEXTVIEW5_POSITION_X + (AppConstants.TEXTVIEW_WIDTH /4)) && point.pos_x < (AppConstants.TEXTVIEW5_POSITION_X + (3*AppConstants.TEXTVIEW_WIDTH /4)) && point.pos_y > (AppConstants.TEXTVIEW5_POSITION_Y + (AppConstants.TEXTVIEW_HEIGHT /4)) && point.pos_y < (AppConstants.TEXTVIEW5_POSITION_Y + (3*AppConstants.TEXTVIEW_HEIGHT /4))) {
+        if(point.pos_x > (AppConstants.TEXTVIEW_POSITION_X[5] + (AppConstants.TEXTVIEW_WIDTH /4)) && point.pos_x < (AppConstants.TEXTVIEW_POSITION_X[5] + (3*AppConstants.TEXTVIEW_WIDTH /4)) && point.pos_y > (AppConstants.TEXTVIEW_POSITION_Y[5] + (AppConstants.TEXTVIEW_HEIGHT /4)) && point.pos_y < (AppConstants.TEXTVIEW_POSITION_Y[5] + (3*AppConstants.TEXTVIEW_HEIGHT /4))) {
             speech.speak("5 FOUND. START TYPING", TextToSpeech.QUEUE_FLUSH, null);
             searchingForFive = false;
         }
         Vibrate vibrate = new Vibrate(vibrator);
-        int strength = (int)(Math.abs(point.pos_x - (AppConstants.TEXTVIEW5_POSITION_X + AppConstants.TEXTVIEW_WIDTH /2)) + Math.abs(point.pos_y - (AppConstants.TEXTVIEW5_POSITION_Y + AppConstants.TEXTVIEW_HEIGHT /2)));
-        int complement = (int)(Math.abs(AppConstants.TEXTVIEW1_POSITION_X - (AppConstants.TEXTVIEW5_POSITION_X + AppConstants.TEXTVIEW_WIDTH /2)) + Math.abs(AppConstants.TEXTVIEW1_POSITION_Y - (AppConstants.TEXTVIEW5_POSITION_Y + AppConstants.TEXTVIEW_HEIGHT /2)));
+        int strength = (int)(Math.abs(point.pos_x - (AppConstants.TEXTVIEW_POSITION_X[5] + AppConstants.TEXTVIEW_WIDTH /2)) + Math.abs(point.pos_y - (AppConstants.TEXTVIEW_POSITION_Y[5] + AppConstants.TEXTVIEW_HEIGHT /2)));
+        int complement = (int)(Math.abs(AppConstants.TEXTVIEW_POSITION_X[5] - (AppConstants.TEXTVIEW_POSITION_X[5] + AppConstants.TEXTVIEW_WIDTH /2)) + Math.abs(AppConstants.TEXTVIEW_POSITION_Y[5] - (AppConstants.TEXTVIEW_POSITION_Y[5] + AppConstants.TEXTVIEW_HEIGHT /2)));
         vibrate.vibrate(1, strength/10, (complement > strength)?(complement - strength)/10:0);
     }
 
 
     public static char getClickedNumber(Touch start, Touch end) {
-//        return '.';
-//    }
-
-        double mid_x = (start.pos_x + end.pos_x)/2;
-        double mid_y = (start.pos_y + end.pos_y)/2;
-        if(mid_x > AppConstants.TEXTVIEW1_POSITION_X && mid_y > AppConstants.TEXTVIEW1_POSITION_Y && mid_x < (AppConstants.TEXTVIEW1_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW1_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '1';
-        if(mid_x > AppConstants.TEXTVIEW2_POSITION_X && mid_y > AppConstants.TEXTVIEW2_POSITION_Y && mid_x < (AppConstants.TEXTVIEW2_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW2_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '2';
-        if(mid_x > AppConstants.TEXTVIEW3_POSITION_X && mid_y > AppConstants.TEXTVIEW3_POSITION_Y && mid_x < (AppConstants.TEXTVIEW3_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW3_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '3';
-        if(mid_x > AppConstants.TEXTVIEW4_POSITION_X && mid_y > AppConstants.TEXTVIEW4_POSITION_Y && mid_x < (AppConstants.TEXTVIEW4_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW4_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '4';
-        if(mid_x > AppConstants.TEXTVIEW5_POSITION_X && mid_y > AppConstants.TEXTVIEW5_POSITION_Y && mid_x < (AppConstants.TEXTVIEW5_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW5_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '5';
-        if(mid_x > AppConstants.TEXTVIEW6_POSITION_X && mid_y > AppConstants.TEXTVIEW6_POSITION_Y && mid_x < (AppConstants.TEXTVIEW6_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW6_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '6';
-        if(mid_x > AppConstants.TEXTVIEW7_POSITION_X && mid_y > AppConstants.TEXTVIEW7_POSITION_Y && mid_x < (AppConstants.TEXTVIEW7_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW7_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '7';
-        if(mid_x > AppConstants.TEXTVIEW8_POSITION_X && mid_y > AppConstants.TEXTVIEW8_POSITION_Y && mid_x < (AppConstants.TEXTVIEW8_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW8_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '8';
-        if(mid_x > AppConstants.TEXTVIEW9_POSITION_X && mid_y > AppConstants.TEXTVIEW9_POSITION_Y && mid_x < (AppConstants.TEXTVIEW9_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW9_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '9';
-        if(mid_x > AppConstants.TEXTVIEW_ASHTERISK_POSITION_X && mid_y > AppConstants.TEXTVIEW_ASHTERISK_POSITION_Y && mid_x < (AppConstants.TEXTVIEW_ASHTERISK_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW_ASHTERISK_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return ':';
-        if(mid_x > AppConstants.TEXTVIEW0_POSITION_X && mid_y > AppConstants.TEXTVIEW0_POSITION_Y && mid_x < (AppConstants.TEXTVIEW0_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW0_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '0';
-        return ';';
+        //return '.';
+        int x = AppConstants.keyboard.getKey(end);
+        AppConstants.keyboard.train(end, x);
+        Log.e("KEYBOARDDDDDDDDDDDD: ", end.pos_x + " : " + end.pos_y + " : " + x);
+        return (char)(x + '0');
     }
+
+//        double mid_x = (start.pos_x + end.pos_x)/2;
+//        double mid_y = (start.pos_y + end.pos_y)/2;
+//        if(mid_x > AppConstants.TEXTVIEW1_POSITION_X && mid_y > AppConstants.TEXTVIEW1_POSITION_Y && mid_x < (AppConstants.TEXTVIEW1_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW1_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+//            return '1';
+//        if(mid_x > AppConstants.TEXTVIEW2_POSITION_X && mid_y > AppConstants.TEXTVIEW2_POSITION_Y && mid_x < (AppConstants.TEXTVIEW2_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW2_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+//            return '2';
+//        if(mid_x > AppConstants.TEXTVIEW3_POSITION_X && mid_y > AppConstants.TEXTVIEW3_POSITION_Y && mid_x < (AppConstants.TEXTVIEW3_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW3_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+//            return '3';
+//        if(mid_x > AppConstants.TEXTVIEW4_POSITION_X && mid_y > AppConstants.TEXTVIEW4_POSITION_Y && mid_x < (AppConstants.TEXTVIEW4_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW4_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+//            return '4';
+//        if(mid_x > AppConstants.TEXTVIEW5_POSITION_X && mid_y > AppConstants.TEXTVIEW5_POSITION_Y && mid_x < (AppConstants.TEXTVIEW5_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW5_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+//            return '5';
+//        if(mid_x > AppConstants.TEXTVIEW6_POSITION_X && mid_y > AppConstants.TEXTVIEW6_POSITION_Y && mid_x < (AppConstants.TEXTVIEW6_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW6_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+//            return '6';
+//        if(mid_x > AppConstants.TEXTVIEW7_POSITION_X && mid_y > AppConstants.TEXTVIEW7_POSITION_Y && mid_x < (AppConstants.TEXTVIEW7_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW7_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+//            return '7';
+//        if(mid_x > AppConstants.TEXTVIEW8_POSITION_X && mid_y > AppConstants.TEXTVIEW8_POSITION_Y && mid_x < (AppConstants.TEXTVIEW8_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW8_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+//            return '8';
+//        if(mid_x > AppConstants.TEXTVIEW9_POSITION_X && mid_y > AppConstants.TEXTVIEW9_POSITION_Y && mid_x < (AppConstants.TEXTVIEW9_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW9_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+//            return '9';
+//        if(mid_x > AppConstants.TEXTVIEW_ASHTERISK_POSITION_X && mid_y > AppConstants.TEXTVIEW_ASHTERISK_POSITION_Y && mid_x < (AppConstants.TEXTVIEW_ASHTERISK_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW_ASHTERISK_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+//            return ':';
+//        if(mid_x > AppConstants.TEXTVIEW0_POSITION_X && mid_y > AppConstants.TEXTVIEW0_POSITION_Y && mid_x < (AppConstants.TEXTVIEW0_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW0_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+//            return '0';
+//        return ';';
+//    }
 
 
 

@@ -1,12 +1,8 @@
 package com.microsoft.anonymousknights.galileo;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
@@ -20,9 +16,7 @@ import android.widget.TextView;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -30,24 +24,24 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
+import KeyboardPlus.Keyboard;
 import Shaker.ShakeListener;
 import T9.T9;
 import  Contacts.*;
-import KeyboardPlus.*;
 
 public class MainActivity extends AppCompatActivity{
 
-    private static final int MY_DATA_CHECK_CODE = 1234;
+
     BlockingDeque<Touch> SenseDataList;
     BlockingQueue<ActionData> ActionDataList;
     Vibrator vibrator;
-    TextToSpeech mTts;
-    T9 T9Dictionary;
-    T9 wordDictionary;
+    //TextToSpeech mTts;
+    T9 T9ContactDictionary;
+    T9 T9WordDictionary;
     ShakeListener mShaker;
+    Keyboard kpp;
     Context mContext;
 
 
@@ -61,22 +55,22 @@ public class MainActivity extends AppCompatActivity{
         ActionDataList = new LinkedBlockingDeque<>();
         vibrator = (Vibrator) getSystemService(this.VIBRATOR_SERVICE);
         mContext = this;
-        T9Dictionary = new T9();
+        T9ContactDictionary = new T9();
 
-        //wordDictionary = new T9();
+        //T9WordDictionary = new T9();
         try {
             File fl = new File(getApplicationContext().getCacheDir(), "crap");
             FileInputStream fi = new FileInputStream(fl);
             ObjectInputStream in = new ObjectInputStream(fi);
-            wordDictionary = (T9)in.readObject();
-            wordDictionary.clear();
+            T9WordDictionary = (T9)in.readObject();
+            T9WordDictionary.clear();
             in.close();
             fi.close();
         }
         catch (Exception e)
         {
             //TODO: Create Dictionary
-            wordDictionary = new T9();
+            T9WordDictionary = new T9();
             try {
                 InputStream in = this.getAssets().open("wordDict.txt");
                 BufferedReader r = new BufferedReader(new InputStreamReader(in));
@@ -88,48 +82,26 @@ public class MainActivity extends AppCompatActivity{
                 Log.d("error:", "Unable to read resource file.");
             }
 
+            //Read keyboard file
+            try {
+                File fl = new File(getApplicationContext().getCacheDir(), "keyboard++");
+                FileInputStream fi = new FileInputStream(fl);
+                ObjectInputStream in = new ObjectInputStream(fi);
+                kpp = (Keyboard)in.readObject();
+                in.close();
+                fi.close();
+            }
+            catch (Exception noKeyPPCache)
+            {
+                kpp = new Keyboard(12);
+            }
         }
-
-        //T9 wordList =
-        int x = T9Dictionary.filter('1');
-        T9Dictionary.clear();
-        x = T9Dictionary.filter('3');
-
-/*
-        try{
-            //File outputDir = getApplicationContext().getCacheDir();// context being the Activity pointer
-            //File outputFile = File.createTempFile("test", "ser", outputDir);
-
-            FileOutputStream fo = new FileOutputStream(new File(getApplicationContext().getCacheDir(), "cachefile"));
-            ObjectOutputStream oout = new ObjectOutputStream(fo);
-            oout.writeObject(T9Dictionary);
-            oout.close();
-            fo.close();
-
-            File fl = new File(getApplicationContext().getCacheDir(), "cachefile");
-            FileInputStream fi = new FileInputStream(fl);
-            ObjectInputStream in = new ObjectInputStream(fi);
-            T9 t2 = (T9)in.readObject();
-            t2.clear();
-            x = t2.filter('1');
-            t2.clear();
-            x = t2.filter('3');
-            long x2 = fl.length();
-            in.close();
-            fi.close();
-        }
-        catch (Exception e)
-        {
-            Log.d("xxxxx", "Output not found.");
-        }
-*/
-
         Contacts allPhoneContacts = new Contacts(this);
         Log.d("galileo_mytag", "Contacts class created");
-        allPhoneContacts.fetchList(T9Dictionary);
+        allPhoneContacts.fetchList(T9ContactDictionary);
 
         LinearLayout baselayout = (LinearLayout) findViewById(R.id.base_layout);
-        baselayout.getX();
+        //baselayout.getX();
 
         baselayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -144,27 +116,28 @@ public class MainActivity extends AppCompatActivity{
         });
 
         mShaker = new ShakeListener(this);
-        mShaker.setOnShakeListener(new ShakeListener.OnShakeListener () {
-            public void onShake()
-            {
+        mShaker.setOnShakeListener(new ShakeListener.OnShakeListener() {
+            public void onShake() {
                 //vibrator.vibrate(100);
-                if(mTts != null)
-                {
-                    mTts.speak("Closing Application. Thank You.", TextToSpeech.QUEUE_FLUSH, null);
+                if (AppConstants.speech != null) {
+                    AppConstants.speech.speak("Going to Home Page. Thank You.", TextToSpeech.QUEUE_FLUSH, null);
                     //TODO: Dump word list
                     try {
                         FileOutputStream fo = new FileOutputStream(new File(getApplicationContext().getCacheDir(), "cachefile"));
                         ObjectOutputStream oout = new ObjectOutputStream(fo);
-                        oout.writeObject(wordDictionary);
+                        oout.writeObject(T9WordDictionary);
                         oout.close();
                         fo.close();
-                    }
-                    catch (Exception e)
-                    {
+                        fo = new FileOutputStream(new File(getApplicationContext().getCacheDir(), "keyboard++"));
+                        oout = new ObjectOutputStream(fo);
+                        oout.writeObject(kpp);
+                        oout.close();
+                        fo.close();
+                    } catch (Exception e) {
                         Log.d("Galileo", "Warning: Could not save word dictionary");
                     }
                     try {
-                        Thread.sleep(2000);
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -173,10 +146,6 @@ public class MainActivity extends AppCompatActivity{
                 System.exit(0);
             }
         });
-
-        Intent checkIntent = new Intent();
-        checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-        startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
     }
 
     @Override
@@ -195,32 +164,9 @@ public class MainActivity extends AppCompatActivity{
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         retrievePositions();
-        if (requestCode == MY_DATA_CHECK_CODE)
-        {
-            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS)
-            {
-                // success, create the TTS instance
-                mTts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-                    @Override
-                    public void onInit(int i) {
-                        Log.d("galileo_mytag", "xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-                        mTts.speak("Hello folks, welcome to galileo. LOCATE 5",
-                                TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
-                                null);
-
-                        //new RequestTask().execute();
-                    }
-                });
-            }
-            else
-            {
-                // missing data, install it
-                Intent installIntent = new Intent();
-                installIntent.setAction(
-                        TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
-                startActivity(installIntent);
-            }
-        }
+        AppConstants.speech.speak("Hello folks, welcome to galileo.",
+                TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
+                null);
         createThreads();
     }
 
@@ -230,7 +176,7 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void run() {
                 try {
-                    ActionIdentifier.IdentifyAction(SenseDataList, ActionDataList, vibrator, mTts);
+                    ActionIdentifier.IdentifyAction(SenseDataList, ActionDataList, vibrator, AppConstants.speech);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -242,7 +188,11 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void run() {
                 try {
-                    KeyboardFSM.FSM(ActionDataList, vibrator, mTts, T9Dictionary, mContext);
+                    if(AppConstants.CurrentAction == AppConstants.EmailAction)
+                        KeyboardFSM.T9Dictioary = T9WordDictionary;
+                    else
+                        KeyboardFSM.T9Dictioary = T9ContactDictionary;
+                    KeyboardFSM.FSM(ActionDataList, vibrator, AppConstants.speech, T9ContactDictionary, T9WordDictionary, mContext);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -356,7 +306,7 @@ public class MainActivity extends AppCompatActivity{
 //                            fiveFoundFlag = true;
 //                        }
 //                        else
-//                            currentAppStatus = ActionIdentifier.IdentifyAction(start, end, moved, currentAppStatus, vibrator, mTts, T9Dictionary, getApplicationContext());
+//                            currentAppStatus = ActionIdentifier.IdentifyAction(start, end, moved, currentAppStatus, vibrator, mTts, T9ContactDictionary, getApplicationContext());
 //                    }
 //                }
 //                try {
