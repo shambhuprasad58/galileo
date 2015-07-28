@@ -32,4 +32,12 @@ public class AppConstants {
     public static float TEXTVIEW_WIDTH;
     public static float TEXTVIEW_HEIGHT;
 
+    public static final int T9Mode = 1;
+    public static final int EnglishMode = 2;
+    public static final int CallMode = 3;
+    public static final int SMSContactMode = 4;
+    public static final int SMSTextMode = 5;
+    public static final int EmailIdMode = 6;
+    public static final int EmailSubjectMode = 7;
+    public static final int EmailBodyMode = 8;
 }

@@ -39,6 +39,8 @@ public class ActionIdentifier {
     private static final int LongPressThresholdTime = 200;
     private static final int MoveThresholdPos = 200;
     private static LinkedList<ContactData> list;
+
+
     @SuppressLint("NewApi")
     public static int IdentifyAction(Touch start, Touch end, boolean moved, int currentAppStatus, Vibrator vibrator, TextToSpeech speech, T9 T9Dictioary, Context context)
     {
