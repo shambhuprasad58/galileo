@@ -82,11 +82,6 @@ public class MainActivity extends AppCompatActivity{
         }
 
         //T9 wordList =
-        new ContactData("mom", "1", T9Dictionary);
-        new ContactData("me", "12", T9Dictionary);
-        new ContactData("hi", "3", T9Dictionary);
-        new ContactData("so", "34", T9Dictionary);
-        new ContactData("bye", "34", T9Dictionary);
         int x = T9Dictionary.filter('1');
         T9Dictionary.clear();
         x = T9Dictionary.filter('3');
