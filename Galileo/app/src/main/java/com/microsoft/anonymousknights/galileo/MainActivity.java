@@ -16,6 +16,17 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import Shaker.ShakeListener;
@@ -30,6 +41,7 @@ public class MainActivity extends AppCompatActivity{
     Vibrator vibrator;
     TextToSpeech mTts;
     T9 T9Dictionary;
+    T9 wordDictionary;
     ShakeListener mShaker;
 
     @SuppressLint("NewApi")
@@ -41,9 +53,77 @@ public class MainActivity extends AppCompatActivity{
         SenseDataList = new ConcurrentLinkedDeque<Touch>();
         vibrator = (Vibrator) getSystemService(this.VIBRATOR_SERVICE);
         T9Dictionary = new T9();
+
+        //wordDictionary = new T9();
+        try {
+            File fl = new File(getApplicationContext().getCacheDir(), "crap");
+            FileInputStream fi = new FileInputStream(fl);
+            ObjectInputStream in = new ObjectInputStream(fi);
+            wordDictionary = (T9)in.readObject();
+            wordDictionary.clear();
+            in.close();
+            fi.close();
+        }
+        catch (Exception e)
+        {
+            //TODO: Create Dictionary
+            wordDictionary = new T9();
+            try {
+                InputStream in = this.getAssets().open("wordDict.txt");
+                BufferedReader r = new BufferedReader(new InputStreamReader(in));
+                String tmpstring = r.readLine();
+                System.out.println(tmpstring);
+            }
+            catch (IOException e2)
+            {
+                Log.d("error:", "Unable to read resource file.");
+            }
+
+        }
+
+        //T9 wordList =
+        new ContactData("mom", "1", T9Dictionary);
+        new ContactData("me", "12", T9Dictionary);
+        new ContactData("hi", "3", T9Dictionary);
+        new ContactData("so", "34", T9Dictionary);
+        new ContactData("bye", "34", T9Dictionary);
+        int x = T9Dictionary.filter('1');
+        T9Dictionary.clear();
+        x = T9Dictionary.filter('3');
+
+/*
+        try{
+            //File outputDir = getApplicationContext().getCacheDir();// context being the Activity pointer
+            //File outputFile = File.createTempFile("test", "ser", outputDir);
+
+            FileOutputStream fo = new FileOutputStream(new File(getApplicationContext().getCacheDir(), "cachefile"));
+            ObjectOutputStream oout = new ObjectOutputStream(fo);
+            oout.writeObject(T9Dictionary);
+            oout.close();
+            fo.close();
+
+            File fl = new File(getApplicationContext().getCacheDir(), "cachefile");
+            FileInputStream fi = new FileInputStream(fl);
+            ObjectInputStream in = new ObjectInputStream(fi);
+            T9 t2 = (T9)in.readObject();
+            t2.clear();
+            x = t2.filter('1');
+            t2.clear();
+            x = t2.filter('3');
+            long x2 = fl.length();
+            in.close();
+            fi.close();
+        }
+        catch (Exception e)
+        {
+            Log.d("xxxxx", "Output not found.");
+        }
+*/
+
         Contacts allPhoneContacts = new Contacts(this);
         Log.d("galileo_mytag", "Contacts class created");
         allPhoneContacts.fetchList(T9Dictionary);
+
         LinearLayout baselayout = (LinearLayout) findViewById(R.id.base_layout);
         baselayout.getX();
 
@@ -67,6 +147,18 @@ public class MainActivity extends AppCompatActivity{
                 if(mTts != null)
                 {
                     mTts.speak("Closing Application. Thank You.", TextToSpeech.QUEUE_FLUSH, null);
+                    //TODO: Dump word list
+                    try {
+                        FileOutputStream fo = new FileOutputStream(new File(getApplicationContext().getCacheDir(), "cachefile"));
+                        ObjectOutputStream oout = new ObjectOutputStream(fo);
+                        oout.writeObject(wordDictionary);
+                        oout.close();
+                        fo.close();
+                    }
+                    catch (Exception e)
+                    {
+                        Log.d("Galileo", "Warning: Could not save word dictionary");
+                    }
                     try {
                         Thread.sleep(2000);
                     } catch (InterruptedException e) {

@@ -1,11 +1,13 @@
 package Trie;
 
+import java.io.Serializable;
+
 import Contacts.ContactData;
 
 /**
  * Created by Administrator on 7/2/2015.
  */
-public class Trie
+public class Trie<tTypename> implements Serializable
 {
     public Node lastHead;
     public int lengthCount;

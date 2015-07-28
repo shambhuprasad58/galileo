@@ -1,9 +1,11 @@
 package Trie;
 
+import java.io.Serializable;
+
 /**
  * Created by Administrator on 7/2/2015.
  */
-public class NodeList extends Node
+public class NodeList extends Node implements Serializable
 {
     public Node[] getList() {
         return list;
