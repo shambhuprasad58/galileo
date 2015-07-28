@@ -9,6 +9,8 @@ import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
 import java.util.LinkedList;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
 
 import Contacts.ContactData;
 import T9.T9;
@@ -23,8 +25,11 @@ public class KeyboardFSM {
     private static T9 T9Dictioary;
     private static LinkedList<ContactData> list;
     private static long previousTapTime = System.currentTimeMillis();
+    private static char previousKey = '.';
     private static String SMSName, SMSNumber, SMSText;
     private static String EmailName, EmailId, EmailSubject, EmailBody;
+    private static boolean typingMode = true;      //true for T9, false for english
+    private static int tapCount = 1;
     static String[] digit=
             {
                     "0",
@@ -41,46 +46,81 @@ public class KeyboardFSM {
                     "HASH"
             };
 
-    public static void FSM(int nextAction, char nextChar, Vibrator vibrator, TextToSpeech speech, T9 T9Dictioary, Context context)
-    {
-        if(PageStatus == AppStatus.searchingFor5)
-        {
+    static char[][] chars=
+            {
+                    {'0'},
+                    {'1'},
+                    {'2', 'A', 'B', 'C'},
+                    {'3', 'D', 'E', 'F'},
+                    {'4', 'G', 'H', 'I'},
+                    {'5', 'J', 'K', 'L'},
+                    {'6', 'M', 'N', 'O'},
+                    {'7', 'P', 'Q', 'R', 'S'},
+                    {'8', 'T', 'U', 'V'},
+                    {'9', 'W', 'X', 'Y', 'Z'},
+            };
 
-        }
-        else
-        {
-            int count = 0;
-            switch(nextAction) {
-                case 1: //DOWN: delete all data entered
+    public static void FSM(BlockingQueue<ActionData> ActionDataList, Vibrator vibrator, TextToSpeech speech, T9 T9Dictioary, Context context)
+    {
+        int nextAction;
+        char nextChar;
+        int count = 0;
+        while(true) {
+            ActionData data = null;
+            try {
+                data = ActionDataList.take();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                return;
+            }
+            nextAction = data.nextAction;
+            nextChar = data.nextChar;
+            switch (nextAction) {
+                case AppConstants.SwipeDirectionDown: //DOWN: delete all data entered
                     Log.d("galileo_mytag ", "SWIPE UP");
                     speech.speak("DELETED ALL INPUT", TextToSpeech.QUEUE_FLUSH, null);
                     //       Call("09800160757", context);
                     PageStatus = AppStatus.enteringNumbers;
                     T9Dictioary.clear();
                     break;
-                case 2: //UP: start search for 5
+                case AppConstants.SwipeDirectionUp: //UP: start search for 5
                     speech.speak("LOCATE 5", TextToSpeech.QUEUE_FLUSH, null);
                     PageStatus = AppStatus.searchingFor5;
                     break;
-                case 3: //LEFT: delete one last digit
+                case AppConstants.SwipeDirectionLeft: //LEFT: delete one last digit
                     //Delete last digit
                     //speech.speak("BACK", TextToSpeech.QUEUE_FLUSH, null);
                     count = T9Dictioary.filter('\b');
                     speech.speak("GOING BACK. " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
                     break;
-                case 4: //RIGHT: Announce to call
+                case AppConstants.SwipeDirectionRight: //RIGHT: Announce to call
                     //clear all
                     if (T9Dictioary.getDictionary().getHead() == null || T9Dictioary.getDictionary().getHead().getSubTreeSize() == 0) {
                         String currentString = T9Dictioary.getCurrentString();
                         T9Dictioary.clear();
-                        switch(mode)
-                        {
-                            case AppConstants.CallMode: Call(null, currentString, context, speech); break;
-                            case AppConstants.SMSContactMode: SMSName = null; SMSNumber = currentString; mode = AppConstants.SMSTextMode; break;
-                            case AppConstants.SMSTextMode: SMSText = SMSText.concat(currentString); break;
-                            case AppConstants.EmailIdMode: EmailName = null; EmailId = currentString; mode = AppConstants.EmailBodyMode; break;
-                            case AppConstants.EmailSubjectMode: EmailSubject = EmailSubject.concat(currentString); break;
-                            case AppConstants.EmailBodyMode: EmailSubject = EmailSubject.concat(currentString); break;
+                        switch (mode) {
+                            case AppConstants.CallMode:
+                                Call(null, currentString, context, speech);
+                                break;
+                            case AppConstants.SMSContactMode:
+                                SMSName = null;
+                                SMSNumber = currentString;
+                                mode = AppConstants.SMSTextMode;
+                                break;
+                            case AppConstants.SMSTextMode:
+                                SMSText = SMSText.concat(currentString);
+                                break;
+                            case AppConstants.EmailIdMode:
+                                EmailName = null;
+                                EmailId = currentString;
+                                mode = AppConstants.EmailBodyMode;
+                                break;
+                            case AppConstants.EmailSubjectMode:
+                                EmailSubject = EmailSubject.concat(currentString);
+                                break;
+                            case AppConstants.EmailBodyMode:
+                                EmailSubject = EmailSubject.concat(currentString);
+                                break;
                         }
                     } else if (T9Dictioary.getDictionary().getHead().getSubTreeSize() < 9) {
                         list = T9Dictioary.traverseDictionary();
@@ -93,30 +133,61 @@ public class KeyboardFSM {
                         speech.speak("TOO MANY RESULTS", TextToSpeech.QUEUE_FLUSH, null);
                     }
                     break;
-                case 5:
+                case AppConstants.LongPress:
+                    break;
+                case AppConstants.SingleClick:
                     //Single Click
                     if (PageStatus == AppStatus.enteringNumbers) {
                         //Next number
-                        Log.d("galileo_mytag ", "TAPPPPPEDDDD ");
-                        count = T9Dictioary.filter(nextChar);
-                        speech.speak(digit[nextChar - '0'] + ". " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
+                        if (typingMode) {
+                            Log.d("galileo_mytag ", "TAPPPPPEDDDD ");
+                            count = T9Dictioary.filter(nextChar);
+                            speech.speak(digit[nextChar - '0'] + ". " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
+                        } else {
+                            if ((System.currentTimeMillis() - previousTapTime) < AppConstants.doubleTapThreshold && previousKey == nextChar) {
+                                T9Dictioary.filter('\b');
+                                count = T9Dictioary.filter(chars[nextChar][tapCount]);
+                                speech.speak(chars[nextChar][tapCount] + ". " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
+                                tapCount = (tapCount + 1) % chars[nextChar].length;
+                            } else {
+                                Log.d("galileo_mytag ", "TAPPPPPEDDDD ");
+                                count = T9Dictioary.filter(nextChar);
+                                speech.speak(digit[nextChar - '0'] + ". " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
+                            }
+                            previousTapTime = System.currentTimeMillis();
+                        }
                     } else if (PageStatus == AppStatus.announcingResults) {
                         //Call
                         Log.d("galileo_mytag ", "ANNOUNCING RESULTS CALLING");
                         T9Dictioary.clear();
                         ContactData contact = list.get(nextChar - '0' - 1);
-                        switch (mode)
-                        {
-                            case AppConstants.CallMode: Call(contact.getName(), contact.getNumber(), context, speech);
-                                                        list.clear(); break;
-                            case AppConstants.SMSContactMode:   SMSName = contact.getName(); SMSNumber = contact.getNumber(); mode = AppConstants.SMSTextMode; break;
-                            case AppConstants.SMSTextMode: SMSText = SMSText.concat(contact.getNumber()); break;
-                            case AppConstants.EmailIdMode: EmailName = null; EmailId = contact.getNumber(); mode = AppConstants.EmailBodyMode; break;
-                            case AppConstants.EmailSubjectMode: EmailSubject = EmailSubject.concat(contact.getNumber()); break;
-                            case AppConstants.EmailBodyMode: EmailSubject = EmailSubject.concat(contact.getNumber()); break;
+                        switch (mode) {
+                            case AppConstants.CallMode:
+                                Call(contact.getName(), contact.getNumber(), context, speech);
+                                list.clear();
+                                break;
+                            case AppConstants.SMSContactMode:
+                                SMSName = contact.getName();
+                                SMSNumber = contact.getNumber();
+                                mode = AppConstants.SMSTextMode;
+                                break;
+                            case AppConstants.SMSTextMode:
+                                SMSText = SMSText.concat(contact.getName());
+                                break;
+                            case AppConstants.EmailIdMode:
+                                EmailName = null;
+                                EmailId = contact.getName();
+                                mode = AppConstants.EmailBodyMode;
+                                break;
+                            case AppConstants.EmailSubjectMode:
+                                EmailSubject = EmailSubject.concat(contact.getName());
+                                break;
+                            case AppConstants.EmailBodyMode:
+                                EmailSubject = EmailSubject.concat(contact.getName());
+                                break;
                         }
-
                     }
+                    break;
             }
         }
     }

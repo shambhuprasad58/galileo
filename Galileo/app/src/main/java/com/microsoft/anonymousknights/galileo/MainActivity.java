@@ -3,6 +3,7 @@ package com.microsoft.anonymousknights.galileo;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -27,7 +28,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import Shaker.ShakeListener;
 import T9.T9;
@@ -37,12 +41,14 @@ import  Contacts.*;
 public class MainActivity extends AppCompatActivity{
 
     private static final int MY_DATA_CHECK_CODE = 1234;
-    ConcurrentLinkedDeque<Touch> SenseDataList;
+    BlockingDeque<Touch> SenseDataList;
+    BlockingQueue<ActionData> ActionDataList;
     Vibrator vibrator;
     TextToSpeech mTts;
     T9 T9Dictionary;
     T9 wordDictionary;
     ShakeListener mShaker;
+    Context mContext;
 
     @SuppressLint("NewApi")
     @Override
@@ -50,8 +56,10 @@ public class MainActivity extends AppCompatActivity{
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        SenseDataList = new ConcurrentLinkedDeque<Touch>();
+        SenseDataList = new LinkedBlockingDeque<>();
+        ActionDataList = new LinkedBlockingDeque<>();
         vibrator = (Vibrator) getSystemService(this.VIBRATOR_SERVICE);
+        mContext = this;
         T9Dictionary = new T9();
 
         //wordDictionary = new T9();
@@ -170,7 +178,7 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
-    Intent checkIntent = new Intent();
+        Intent checkIntent = new Intent();
         checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
         startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
     }
@@ -204,7 +212,7 @@ public class MainActivity extends AppCompatActivity{
                                 TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
                                 null);
 
-                        new RequestTask().execute();
+                        //new RequestTask().execute();
                     }
                 });
             }
@@ -217,6 +225,34 @@ public class MainActivity extends AppCompatActivity{
                 startActivity(installIntent);
             }
         }
+        createThreads();
+    }
+
+    public void createThreads()
+    {
+        Thread ActionThread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    ActionIdentifier.IdentifyAction(SenseDataList, ActionDataList, vibrator, mTts);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        ActionThread.start();
+
+        Thread FSMThread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    KeyboardFSM.FSM(ActionDataList, vibrator, mTts, T9Dictionary, mContext);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        FSMThread.start();
     }
 
     public void retrievePositions()
@@ -288,57 +324,56 @@ public class MainActivity extends AppCompatActivity{
 
         Log.d("galileo_mytag", AppConstants.TEXTVIEW5_POSITION_X + "--------------" + AppConstants.TEXTVIEW5_POSITION_Y);
     }
-
-    public void setAppConstantsPositions()
-    {
-
-    }
-
-    class RequestTask extends AsyncTask<Void, Void, Void> {
-
-        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-        @Override
-        protected Void doInBackground(Void... v) {
-            Log.d("galileo_mytag", "BACKGROUNDddddddddddddd");
-            boolean moved, fiveFoundFlag = false;
-            SenseDataList.clear();
-            int currentAppStatus = AppStatus.searchingFor5;
-            while(true) {
-                if(!SenseDataList.isEmpty()) {
-                    Log.d("galileo_mytag", "LIST NOT EMPTY");
-                    if (SenseDataList.peek().type == MotionEvent.ACTION_UP || currentAppStatus == AppStatus.searchingFor5) {
-                        Log.d("galileo_mytag", "ACTION UP");
-                        moved = false;
-                        Touch end = SenseDataList.getFirst();
-                        Touch start = SenseDataList.getLast();
-                        if(SenseDataList.size() > 5)
-                            moved = true;
-                        SenseDataList.clear();
-                        if(currentAppStatus == AppStatus.searchingFor5) {
-                            currentAppStatus = ActionIdentifier.searchingForFive(end, vibrator, mTts);
-                            fiveFoundFlag = false;
-                        }
-                        else if(!fiveFoundFlag)
-                        {
-                            fiveFoundFlag = true;
-                        }
-                        else
-                            currentAppStatus = ActionIdentifier.IdentifyAction(start, end, moved, currentAppStatus, vibrator, mTts, T9Dictionary, getApplicationContext());
-                    }
-                }
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            //return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-            //Do anything with response..
-        }
-    }
+//
+//    public void setAppConstantsPositions()
+//    {
+//
+//    }
+//
+//    class RequestTask extends AsyncTask<Void, Void, Void> {
+//        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+//        @Override
+//        protected Void doInBackground(Void... v) {
+//            Log.d("galileo_mytag", "BACKGROUNDddddddddddddd");
+//            boolean moved, fiveFoundFlag = false;
+//            SenseDataList.clear();
+//            int currentAppStatus = AppStatus.searchingFor5;
+//            while(true) {
+//                if(!SenseDataList.isEmpty()) {
+//                    Log.d("galileo_mytag", "LIST NOT EMPTY");
+//                    if (SenseDataList.peek().type == MotionEvent.ACTION_UP || currentAppStatus == AppStatus.searchingFor5) {
+//                        Log.d("galileo_mytag", "ACTION UP");
+//                        moved = false;
+//                        Touch end = SenseDataList.getFirst();
+//                        Touch start = SenseDataList.getLast();
+//                        if(SenseDataList.size() > 5)
+//                            moved = true;
+//                        SenseDataList.clear();
+//                        if(currentAppStatus == AppStatus.searchingFor5) {
+//                            currentAppStatus = ActionIdentifier.searchingForFive(end, vibrator, mTts);
+//                            fiveFoundFlag = false;
+//                        }
+//                        else if(!fiveFoundFlag)
+//                        {
+//                            fiveFoundFlag = true;
+//                        }
+//                        else
+//                            currentAppStatus = ActionIdentifier.IdentifyAction(start, end, moved, currentAppStatus, vibrator, mTts, T9Dictionary, getApplicationContext());
+//                    }
+//                }
+//                try {
+//                    Thread.sleep(50);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            //return null;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Void result) {
+//            super.onPostExecute(result);
+//            //Do anything with response..
+//        }
+//    }
 }

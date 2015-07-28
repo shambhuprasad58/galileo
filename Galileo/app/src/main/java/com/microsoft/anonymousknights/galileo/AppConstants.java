@@ -40,4 +40,14 @@ public class AppConstants {
     public static final int EmailIdMode = 6;
     public static final int EmailSubjectMode = 7;
     public static final int EmailBodyMode = 8;
+
+    public static final int doubleTapThreshold = 800;       //in millisecond
+
+    public static final int SwipeDirectionUp = 1001;
+    public static final int SwipeDirectionDown = 1002;
+    public static final int SwipeDirectionLeft = 1003;
+    public static final int SwipeDirectionRight = 1004;
+
+    public static final int SingleClick = 1005;
+    public static final int LongPress = 1006;
 }

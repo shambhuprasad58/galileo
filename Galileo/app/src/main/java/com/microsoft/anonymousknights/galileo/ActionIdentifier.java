@@ -8,10 +8,13 @@ import android.net.Uri;
 import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+import android.view.MotionEvent;
 
 import Contacts.ContactData;
 
 import java.util.LinkedList;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import T9.T9;
@@ -21,25 +24,123 @@ import Vibrate.Vibrate;
  * Created by sam on 7/2/2015.
  */
 public class ActionIdentifier {
-    static String[] digit=
-    {
-            "0",
-            "1",
-        "2 A B C",
-            "3 D E F",
-            "4 G H I",
-            "5 J K L",
-            "6 M N O",
-            "7 P Q R S",
-            "8 T U V",
-            "9 W X Y Z",
-            "STAR",
-            "HASH"
-    };
+
     private static final int LongPressThresholdTime = 200;
     private static final int MoveThresholdPos = 200;
-    private static LinkedList<ContactData> list;
+    private static boolean searchingForFive = true;
 
+    public static int IdentifyAction(BlockingDeque<Touch> SenseDataList, BlockingQueue<ActionData> ActionDataList, Vibrator vibrator, TextToSpeech speech)
+    {
+        ActionData data;
+        while(true)
+        {
+            Touch touch = SenseDataList.pop();
+            if(searchingForFive)
+            {
+                searchingForFive(touch, vibrator, speech);
+            }
+            else
+            {
+                if(touch.type == MotionEvent.ACTION_UP) {
+                    Touch end = touch;
+                    Touch start = SenseDataList.pollLast();
+                    SenseDataList.clear();
+                    Log.d("IdentifyAction: ", "ENTEREDDDDDDDDDD");
+                    data = new ActionData();
+                    data.nextChar = '.';
+                    if (Math.abs(start.pos_x - end.pos_x) > MoveThresholdPos || Math.abs(start.pos_y - end.pos_y) > MoveThresholdPos) {
+                        Log.d("IdentifyAction: ", "MOVEEEEEEEEEEEE");
+                        //Move Action
+                        data.nextAction = getMoveDirection(start, end);
+
+                    } else if (start.timestamp - end.timestamp < LongPressThresholdTime) {
+                        //Single Click
+                        data.nextChar = getClickedNumber(start, end);
+                        data.nextAction = AppConstants.SingleClick;
+                    }
+                    else {
+                        data.nextAction = AppConstants.LongPress;
+                    }
+                    ActionDataList.add(data);
+                }
+            }
+        }
+    }
+
+    public static int getMoveDirection(Touch start, Touch end)
+    {
+        if(Math.abs(end.pos_x - start.pos_x) > Math.abs(end.pos_y - start.pos_y))
+        {
+            if(end.pos_x > start.pos_x)
+                return AppConstants.SwipeDirectionDown;
+            return AppConstants.SwipeDirectionDown;
+        }
+        if(end.pos_y > start.pos_y)
+            return AppConstants.SwipeDirectionDown;
+        return AppConstants.SwipeDirectionDown;
+
+    }
+
+
+    public static void searchingForFive(Touch point, Vibrator vibrator, TextToSpeech speech)
+    {
+        if(point.pos_x > (AppConstants.TEXTVIEW5_POSITION_X + (AppConstants.TEXTVIEW_WIDTH /4)) && point.pos_x < (AppConstants.TEXTVIEW5_POSITION_X + (3*AppConstants.TEXTVIEW_WIDTH /4)) && point.pos_y > (AppConstants.TEXTVIEW5_POSITION_Y + (AppConstants.TEXTVIEW_HEIGHT /4)) && point.pos_y < (AppConstants.TEXTVIEW5_POSITION_Y + (3*AppConstants.TEXTVIEW_HEIGHT /4))) {
+            speech.speak("5 FOUND. START TYPING", TextToSpeech.QUEUE_FLUSH, null);
+            searchingForFive = false;
+        }
+        Vibrate vibrate = new Vibrate(vibrator);
+        int strength = (int)(Math.abs(point.pos_x - (AppConstants.TEXTVIEW5_POSITION_X + AppConstants.TEXTVIEW_WIDTH /2)) + Math.abs(point.pos_y - (AppConstants.TEXTVIEW5_POSITION_Y + AppConstants.TEXTVIEW_HEIGHT /2)));
+        int complement = (int)(Math.abs(AppConstants.TEXTVIEW1_POSITION_X - (AppConstants.TEXTVIEW5_POSITION_X + AppConstants.TEXTVIEW_WIDTH /2)) + Math.abs(AppConstants.TEXTVIEW1_POSITION_Y - (AppConstants.TEXTVIEW5_POSITION_Y + AppConstants.TEXTVIEW_HEIGHT /2)));
+        vibrate.vibrate(1, strength/10, (complement > strength)?(complement - strength)/10:0);
+    }
+
+
+    public static char getClickedNumber(Touch start, Touch end) {
+//        return '.';
+//    }
+
+        double mid_x = (start.pos_x + end.pos_x)/2;
+        double mid_y = (start.pos_y + end.pos_y)/2;
+        if(mid_x > AppConstants.TEXTVIEW1_POSITION_X && mid_y > AppConstants.TEXTVIEW1_POSITION_Y && mid_x < (AppConstants.TEXTVIEW1_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW1_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+            return '1';
+        if(mid_x > AppConstants.TEXTVIEW2_POSITION_X && mid_y > AppConstants.TEXTVIEW2_POSITION_Y && mid_x < (AppConstants.TEXTVIEW2_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW2_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+            return '2';
+        if(mid_x > AppConstants.TEXTVIEW3_POSITION_X && mid_y > AppConstants.TEXTVIEW3_POSITION_Y && mid_x < (AppConstants.TEXTVIEW3_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW3_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+            return '3';
+        if(mid_x > AppConstants.TEXTVIEW4_POSITION_X && mid_y > AppConstants.TEXTVIEW4_POSITION_Y && mid_x < (AppConstants.TEXTVIEW4_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW4_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+            return '4';
+        if(mid_x > AppConstants.TEXTVIEW5_POSITION_X && mid_y > AppConstants.TEXTVIEW5_POSITION_Y && mid_x < (AppConstants.TEXTVIEW5_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW5_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+            return '5';
+        if(mid_x > AppConstants.TEXTVIEW6_POSITION_X && mid_y > AppConstants.TEXTVIEW6_POSITION_Y && mid_x < (AppConstants.TEXTVIEW6_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW6_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+            return '6';
+        if(mid_x > AppConstants.TEXTVIEW7_POSITION_X && mid_y > AppConstants.TEXTVIEW7_POSITION_Y && mid_x < (AppConstants.TEXTVIEW7_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW7_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+            return '7';
+        if(mid_x > AppConstants.TEXTVIEW8_POSITION_X && mid_y > AppConstants.TEXTVIEW8_POSITION_Y && mid_x < (AppConstants.TEXTVIEW8_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW8_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+            return '8';
+        if(mid_x > AppConstants.TEXTVIEW9_POSITION_X && mid_y > AppConstants.TEXTVIEW9_POSITION_Y && mid_x < (AppConstants.TEXTVIEW9_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW9_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+            return '9';
+        if(mid_x > AppConstants.TEXTVIEW_ASHTERISK_POSITION_X && mid_y > AppConstants.TEXTVIEW_ASHTERISK_POSITION_Y && mid_x < (AppConstants.TEXTVIEW_ASHTERISK_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW_ASHTERISK_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+            return ':';
+        if(mid_x > AppConstants.TEXTVIEW0_POSITION_X && mid_y > AppConstants.TEXTVIEW0_POSITION_Y && mid_x < (AppConstants.TEXTVIEW0_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW0_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
+            return '0';
+        return ';';
+    }
+
+
+
+    /*
+
+    public static void Call(String number, Context context)
+    {
+        try {
+            Intent callIntent = new Intent(Intent.ACTION_CALL);
+            callIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            callIntent.setData(Uri.parse("tel:" + number));
+            context.startActivity(callIntent);
+        } catch (ActivityNotFoundException activityException) {
+            Log.e("galileo_mytag", "Call failed", activityException);
+        }
+    }
 
     @SuppressLint("NewApi")
     public static int IdentifyAction(Touch start, Touch end, boolean moved, int currentAppStatus, Vibrator vibrator, TextToSpeech speech, T9 T9Dictioary, Context context)
@@ -140,106 +241,21 @@ public class ActionIdentifier {
                 Call(contact.getNumber(), context);
             }
         }
-//        else
-//        {
-//            //Long Press
-//            if(currentAppStatus == AppStatus.enteringNumbers)
-//            {
-//                currentAppStatus = AppStatus.announcingResults;
-//                //announce Results
-//            }
-//            else if(currentAppStatus == AppStatus.announcingResults)
-//            {
-//                currentAppStatus = AppStatus.enteringNumbers;
-//            }
-//        }
+        else
+        {
+            //Long Press
+            if(currentAppStatus == AppStatus.enteringNumbers)
+            {
+                currentAppStatus = AppStatus.announcingResults;
+                //announce Results
+            }
+            else if(currentAppStatus == AppStatus.announcingResults)
+            {
+                currentAppStatus = AppStatus.enteringNumbers;
+            }
+        }
         return currentAppStatus;
     }
-
-    public static int IdentifyAction(Touch start, Touch end)
-    {
-        Log.d("IdentifyAction: ", "ENTEREDDDDDDDDDD");
-        if(Math.abs(start.pos_x - end.pos_x) > MoveThresholdPos || Math.abs(start.pos_y - end.pos_y) > MoveThresholdPos)
-        {
-            Log.d("IdentifyAction: ", "MOVEEEEEEEEEEEE");
-            //Move Action
-            return getMoveDirection(start, end);
-
-        }
-        else if(start.timestamp - end.timestamp < LongPressThresholdTime)
-        {
-            //Single Click
-            return getClickedNumber(start, end);
-        }
-        return -1;
-        //return currentAppStatus;
-    }
-
-    public static int getMoveDirection(Touch start, Touch end)
-    {
-        if(Math.abs(end.pos_x - start.pos_x) > Math.abs(end.pos_y - start.pos_y))
-        {
-            if(end.pos_x > start.pos_x)
-                return 4;
-            return 3;
-        }
-        if(end.pos_y > start.pos_y)
-            return 1;
-        return 2;
-
-    }
-
-    public static char getClickedNumber(Touch start, Touch end)
-    {
-        double mid_x = (start.pos_x + end.pos_x)/2;
-        double mid_y = (start.pos_y + end.pos_y)/2;
-        if(mid_x > AppConstants.TEXTVIEW1_POSITION_X && mid_y > AppConstants.TEXTVIEW1_POSITION_Y && mid_x < (AppConstants.TEXTVIEW1_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW1_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '1';
-        if(mid_x > AppConstants.TEXTVIEW2_POSITION_X && mid_y > AppConstants.TEXTVIEW2_POSITION_Y && mid_x < (AppConstants.TEXTVIEW2_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW2_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '2';
-        if(mid_x > AppConstants.TEXTVIEW3_POSITION_X && mid_y > AppConstants.TEXTVIEW3_POSITION_Y && mid_x < (AppConstants.TEXTVIEW3_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW3_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '3';
-        if(mid_x > AppConstants.TEXTVIEW4_POSITION_X && mid_y > AppConstants.TEXTVIEW4_POSITION_Y && mid_x < (AppConstants.TEXTVIEW4_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW4_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '4';
-        if(mid_x > AppConstants.TEXTVIEW5_POSITION_X && mid_y > AppConstants.TEXTVIEW5_POSITION_Y && mid_x < (AppConstants.TEXTVIEW5_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW5_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '5';
-        if(mid_x > AppConstants.TEXTVIEW6_POSITION_X && mid_y > AppConstants.TEXTVIEW6_POSITION_Y && mid_x < (AppConstants.TEXTVIEW6_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW6_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '6';
-        if(mid_x > AppConstants.TEXTVIEW7_POSITION_X && mid_y > AppConstants.TEXTVIEW7_POSITION_Y && mid_x < (AppConstants.TEXTVIEW7_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW7_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '7';
-        if(mid_x > AppConstants.TEXTVIEW8_POSITION_X && mid_y > AppConstants.TEXTVIEW8_POSITION_Y && mid_x < (AppConstants.TEXTVIEW8_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW8_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '8';
-        if(mid_x > AppConstants.TEXTVIEW9_POSITION_X && mid_y > AppConstants.TEXTVIEW9_POSITION_Y && mid_x < (AppConstants.TEXTVIEW9_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW9_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '9';
-        if(mid_x > AppConstants.TEXTVIEW_ASHTERISK_POSITION_X && mid_y > AppConstants.TEXTVIEW_ASHTERISK_POSITION_Y && mid_x < (AppConstants.TEXTVIEW_ASHTERISK_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW_ASHTERISK_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return ':';
-        if(mid_x > AppConstants.TEXTVIEW0_POSITION_X && mid_y > AppConstants.TEXTVIEW0_POSITION_Y && mid_x < (AppConstants.TEXTVIEW0_POSITION_X + AppConstants.TEXTVIEW_WIDTH) && mid_y < (AppConstants.TEXTVIEW0_POSITION_Y + AppConstants.TEXTVIEW_WIDTH))
-            return '0';
-        return ';';
-    }
-
-    public static void Call(String number, Context context)
-    {
-        try {
-            Intent callIntent = new Intent(Intent.ACTION_CALL);
-            callIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            callIntent.setData(Uri.parse("tel:" + number));
-            context.startActivity(callIntent);
-        } catch (ActivityNotFoundException activityException) {
-            Log.e("galileo_mytag", "Call failed", activityException);
-        }
-    }
-
-    public static int searchingForFive(Touch point, Vibrator vibrator, TextToSpeech speech)
-    {
-        if(point.pos_x > (AppConstants.TEXTVIEW5_POSITION_X + (AppConstants.TEXTVIEW_WIDTH /4)) && point.pos_x < (AppConstants.TEXTVIEW5_POSITION_X + (3*AppConstants.TEXTVIEW_WIDTH /4)) && point.pos_y > (AppConstants.TEXTVIEW5_POSITION_Y + (AppConstants.TEXTVIEW_HEIGHT /4)) && point.pos_y < (AppConstants.TEXTVIEW5_POSITION_Y + (3*AppConstants.TEXTVIEW_HEIGHT /4))) {
-            speech.speak("5 FOUND. START TYPING", TextToSpeech.QUEUE_FLUSH, null);
-            return AppStatus.enteringNumbers;
-        }
-        Vibrate vibrate = new Vibrate(vibrator);
-        int strength = (int)(Math.abs(point.pos_x - (AppConstants.TEXTVIEW5_POSITION_X + AppConstants.TEXTVIEW_WIDTH /2)) + Math.abs(point.pos_y - (AppConstants.TEXTVIEW5_POSITION_Y + AppConstants.TEXTVIEW_HEIGHT /2)));
-        int complement = (int)(Math.abs(AppConstants.TEXTVIEW1_POSITION_X - (AppConstants.TEXTVIEW5_POSITION_X + AppConstants.TEXTVIEW_WIDTH /2)) + Math.abs(AppConstants.TEXTVIEW1_POSITION_Y - (AppConstants.TEXTVIEW5_POSITION_Y + AppConstants.TEXTVIEW_HEIGHT /2)));
-        vibrate.vibrate(1, strength/10, (complement > strength)?(complement - strength)/10:0);
-        return AppStatus.searchingFor5;
-    }
+    */
 }
+
