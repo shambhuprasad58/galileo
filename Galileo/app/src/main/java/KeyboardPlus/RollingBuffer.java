@@ -48,7 +48,7 @@ public class RollingBuffer {
         xBuffer = new double[length];
         yBuffer = new double[length];
 
-        count = 1;
+        count = 0;
         xMean = 0;
         yMean = 0;
         xVar = 0;
@@ -86,6 +86,13 @@ public class RollingBuffer {
         }
         else
         {
+            count = 0;
+            xMean = 0;
+            yMean = 0;
+            xVar = 0;
+            yVar = 0;
+            coVar = 0;
+            pos = 0;
             return;
         }
 
