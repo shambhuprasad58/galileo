@@ -27,9 +27,17 @@ public class Keyboard
     }
     double gaussian2(double x, double y, double xMean, double yMean, double xVar, double yVar, double coVar)
     {
+        if(xVar == 0 || yVar == 0)
+        {
+            return  -1;
+        }
         double xSD = Math.sqrt(xVar);
         double ySD = Math.sqrt(yVar);
         double rho2 = coVar * coVar/ (xVar * yVar);
+        if(rho2 - 1 == 0)
+        {
+            return -1;
+        }
         double output = (x - xMean) / xSD - (y - yMean) / ySD;
         output = output * output;
         output = -output / (2 * (1 - rho2));
@@ -49,6 +57,11 @@ public class Keyboard
         for (int i = 0; i < key.length; i++)
         {
             probability = gaussian2(touch.pos_x, touch.pos_y, key[i].getxMean(), key[i].getyMean(), key[i].getxVar(), key[i].getyVar(), key[i].getCoVar());
+
+            if(probability < 0)
+            {
+                return -1;
+            }
 
             if(probability > maxProbability)
             {
