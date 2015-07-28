@@ -9,6 +9,7 @@ import com.microsoft.anonymousknights.galileo.Touch;
  */
 public class Keyboard
 {
+    static int minPresses = 50;
     public Touch getKey(int i)
     {
         Touch t = new Touch();
@@ -34,8 +35,15 @@ public class Keyboard
         key = new RollingBuffer[nKeys];
         for (int i = 0; i < nKeys; i++)
         {
-            key[i] = new RollingBuffer(1000);
+            key[i] = new RollingBuffer(minPresses * 20);
+            //burn in
+            for(int j = 0; j < 2 * minPresses; j++)
+            {
+                key[i].insert(AppConstants.TEXTVIEW_POSITION_X[i], AppConstants.TEXTVIEW_POSITION_Y[i]);
+            }
         }
+
+
     }
     double gaussian2(double x, double y, double xMean, double yMean, double xVar, double yVar, double coVar)
     {
@@ -60,6 +68,11 @@ public class Keyboard
         return output;
     }
 
+    double dist2(Touch t, double xMean, double yMean)
+    {
+        return (t.pos_x - xMean) * (t.pos_x - xMean) + (t.pos_y - yMean) * (t.pos_y - yMean);
+    }
+
     public int getKey(Touch touch)
     {
         double maxProbability = -1;
@@ -68,9 +81,15 @@ public class Keyboard
 
         for (int i = 0; i < key.length; i++)
         {
+            //min key
+            if(dist2(touch, key[i].getxMean(), key[i].getyMean()) < AppConstants.MIN_KEY_RADIUS)
+            {
+                return i;
+            }
             probability = gaussian2(touch.pos_x, touch.pos_y, key[i].getxMean(), key[i].getyMean(), key[i].getxVar(), key[i].getyVar(), key[i].getCoVar());
 
-            if(probability < 0)
+            //fallback to hard keys
+            if(key[i].getCount() < minPresses || probability < 0)
             {
                 for (int j = 0; i < key.length; i++)
                 {

@@ -256,6 +256,8 @@ public class MainActivity extends AppCompatActivity{
         TextView textView = (TextView) findViewById(R.id.TextView5);
         AppConstants.TEXTVIEW_WIDTH = textView.getWidth();
         AppConstants.TEXTVIEW_HEIGHT = textView.getHeight();
+        AppConstants.MIN_KEY_RADIUS = (AppConstants.TEXTVIEW_HEIGHT * AppConstants.TEXTVIEW_HEIGHT +
+                AppConstants.TEXTVIEW_WIDTH * AppConstants.TEXTVIEW_WIDTH) / 4;
         int[] location = new int[2];
 
         textView = (TextView) findViewById(R.id.TextView1);
