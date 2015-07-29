@@ -29,6 +29,7 @@ public class KeyboardFSM {
     private static String EmailId, EmailSubject, EmailBody;
     private static boolean T9typingMode = true;      //true for T9, false for english
     private static int tapCount = 1;
+    /*
     static String[] digit=
             {
                     "0",
@@ -44,7 +45,23 @@ public class KeyboardFSM {
                     "STAR",
                     "HASH"
             };
+            */
 
+    static String[] digit=
+            {
+                    "0",
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                    "STAR",
+                    "HASH"
+            };
     static char[][] chars=
             {
                     {'0'},
