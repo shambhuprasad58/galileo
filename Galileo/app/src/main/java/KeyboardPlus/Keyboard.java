@@ -11,7 +11,7 @@ import java.io.Serializable;
  */
 public class Keyboard implements Serializable
 {
-    static int minPresses = 20;
+    static int minPresses = 10;
     public Touch getKey(int i)
     {
         Touch t = new Touch();
@@ -39,10 +39,12 @@ public class Keyboard implements Serializable
         {
             key[i] = new RollingBuffer(1000);
             //burn in
+            /*
             for(int j = 0; j < 10; j++)
             {
-                key[i].insert(AppConstants.TEXTVIEW_POSITION_X[i], AppConstants.TEXTVIEW_POSITION_Y[i]);
+                key[i].insert(AppConstants.TEXTVIEW_POSITION_X[i] + AppConstants.TEXTVIEW_WIDTH/2, AppConstants.TEXTVIEW_POSITION_Y[i] + AppConstants.TEXTVIEW_HEIGHT/2);
             }
+            */
         }
 
 
@@ -86,12 +88,13 @@ public class Keyboard implements Serializable
             //min key
             if(dist2(touch, key[i].getxMean(), key[i].getyMean()) < AppConstants.MIN_KEY_RADIUS)
             {
-                //return i;
+                return i;
             }
             probability = gaussian2(touch.pos_x, touch.pos_y, key[i].getxMean(), key[i].getyMean(), key[i].getxVar(), key[i].getyVar(), key[i].getCoVar());
 
             //fallback to hard keys
-            if(key[i].getCount() < minPresses || probability < 0)
+            //if(key[i].getCount() < minPresses || probability < 0)
+            if(true)
             {
                 for (int j = 0; j < key.length; j++)
                 {

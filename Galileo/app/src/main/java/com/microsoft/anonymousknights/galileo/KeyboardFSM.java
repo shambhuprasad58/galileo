@@ -19,7 +19,7 @@ import T9.T9;
  */
 public class KeyboardFSM {
 
-    private static int PageStatus;
+    private static int PageStatus = AppConstants.enteringNumbers;
     private static int mode;
     public static T9 T9Dictioary;
     private static LinkedList<ContactData> list;
@@ -64,6 +64,12 @@ public class KeyboardFSM {
         int nextAction;
         char nextChar;
         int count = 0;
+        switch (AppConstants.CurrentAction)
+        {
+            case AppConstants.CallAction: mode = AppConstants.CallMode; break;
+            case AppConstants.SMSAction: mode = AppConstants.SMSContactMode; break;
+            case AppConstants.EmailAction: mode = AppConstants.EmailIdMode; break;
+        }
         String currentString = "";
         while(true) {
             ActionData data = null;
@@ -80,13 +86,13 @@ public class KeyboardFSM {
                     Log.d("galileo_mytag ", "SWIPE UP");
                     speech.speak("DELETED ALL INPUT", TextToSpeech.QUEUE_FLUSH, null);
                     //       Call("09800160757", context);
-                    PageStatus = AppStatus.enteringNumbers;
+                    PageStatus = AppConstants.enteringNumbers;
                     T9Dictioary.clear();
                     currentString = "";
                     break;
                 case AppConstants.SwipeDirectionUp: //UP: start search for 5
                     speech.speak("LOCATE 5", TextToSpeech.QUEUE_FLUSH, null);
-                    PageStatus = AppStatus.searchingFor5;
+                    PageStatus = AppConstants.searchingFor5;
                     break;
                 case AppConstants.SwipeDirectionLeft: //LEFT: delete one last digit
                     //Delete last digit
@@ -113,7 +119,7 @@ public class KeyboardFSM {
                                 for (int i = 0; i < list.size(); i++) {
                                     speech.speak("PRESS " + (i + 1) + " FOR " + list.get(i).getName(), TextToSpeech.QUEUE_ADD, null);
                                 }
-                                PageStatus = AppStatus.announcingResults;
+                                PageStatus = AppConstants.announcingResults;
                                 break;
                             } else {
                                 speech.speak("TOO MANY RESULTS", TextToSpeech.QUEUE_FLUSH, null);
@@ -164,26 +170,31 @@ public class KeyboardFSM {
                     break;
                 case AppConstants.SingleClick:
                     //Single Click
-                    if (PageStatus == AppStatus.enteringNumbers) {
+                    if (PageStatus == AppConstants.enteringNumbers) {
                         //Next number
                         if (T9typingMode) {
-                            Log.d("galileo_mytag ", "TAPPPPPEDDDD ");
+                            Log.d("galileo_mytag ", "T9  TAPPPPPEDDDD ");
                             count = T9Dictioary.filter(nextChar);
                             speech.speak(digit[nextChar - '0'] + ". " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
                         } else {
                             if ((System.currentTimeMillis() - previousTapTime) < AppConstants.doubleTapThreshold && previousKey == nextChar) {
-                                T9Dictioary.filter('\b');
-                                count = T9Dictioary.filter(chars[nextChar][tapCount]);
-                                speech.speak(chars[nextChar][tapCount] + ". " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
+                                //T9Dictioary.filter('\b');
+                                //count = T9Dictioary.filter(chars[nextChar][tapCount]);
+                                //speech.speak(chars[nextChar][tapCount] + ". " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
+                                Log.d("galileo_mytag ", "ENGLISH  MULTI TAPPPPPEDDDD " + chars[nextChar][tapCount]);
+                                currentString = currentString.substring(0, currentString.length()-1);
+                                currentString = currentString + chars[nextChar][tapCount];
                                 tapCount = (tapCount + 1) % chars[nextChar].length;
                             } else {
-                                Log.d("galileo_mytag ", "TAPPPPPEDDDD ");
-                                count = T9Dictioary.filter(nextChar);
-                                speech.speak(digit[nextChar - '0'] + ". " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
+                                //count = T9Dictioary.filter(nextChar);
+                                //speech.speak(digit[nextChar - '0'] + ". " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
+                                Log.d("galileo_mytag ", "ENGLISH NEW TAPPPPPEDDDD " + chars[nextChar][tapCount]);
+                                currentString = currentString + chars[nextChar][1];
+                                tapCount = 1;
                             }
                             previousTapTime = System.currentTimeMillis();
                         }
-                    } else if (PageStatus == AppStatus.announcingResults) {
+                    } else if (PageStatus == AppConstants.announcingResults) {
                         //Call
                         Log.d("galileo_mytag ", "ANNOUNCING RESULTS CALLING");
                         T9Dictioary.clear();
@@ -229,7 +240,7 @@ public class KeyboardFSM {
             else
             {
                 speech.speak("CALLING " + name, TextToSpeech.QUEUE_FLUSH, null);
-                PageStatus = AppStatus.enteringNumbers;
+                PageStatus = AppConstants.enteringNumbers;
             }
             try {
                 Thread.sleep(1000);
@@ -259,7 +270,7 @@ public class KeyboardFSM {
             else
             {
                 speech.speak("SENDING SMS to " + SMSName, TextToSpeech.QUEUE_FLUSH, null);
-                PageStatus = AppStatus.enteringNumbers;
+                PageStatus = AppConstants.enteringNumbers;
             }
             try {
                 Thread.sleep(1000);

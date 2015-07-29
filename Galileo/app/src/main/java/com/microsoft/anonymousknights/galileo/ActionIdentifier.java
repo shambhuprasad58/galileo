@@ -47,6 +47,7 @@ public class ActionIdentifier {
             if(searchingForFive)
             {
                 //Log.d("IdentifyAction: ", "SEARCHING FOR FIVE");
+                SenseDataList.clear();
                 searchingForFive(touch, vibrator, speech);
             }
             else
@@ -77,7 +78,7 @@ public class ActionIdentifier {
                         }
 
 
-                    } else if (start.timestamp - end.timestamp < LongPressThresholdTime) {
+                    } else if ((end.timestamp - start.timestamp) < LongPressThresholdTime) {
                         //Single Click
                         data.nextChar = getClickedNumber(start, end);
                         data.nextAction = AppConstants.SingleClick;
@@ -117,10 +118,14 @@ public class ActionIdentifier {
             return;
         }
         Vibrate vibrate = new Vibrate(vibrator);
-        int strength = (int)(Math.abs(point.pos_x - (AppConstants.TEXTVIEW_POSITION_X[5] + AppConstants.TEXTVIEW_WIDTH /2)) + Math.abs(point.pos_y - (AppConstants.TEXTVIEW_POSITION_Y[5] + AppConstants.TEXTVIEW_HEIGHT /2)));
-        int complement = (int)(Math.abs(AppConstants.TEXTVIEW_POSITION_X[5] - (AppConstants.TEXTVIEW_POSITION_X[5] + AppConstants.TEXTVIEW_WIDTH /2)) + Math.abs(AppConstants.TEXTVIEW_POSITION_Y[5] - (AppConstants.TEXTVIEW_POSITION_Y[5] + AppConstants.TEXTVIEW_HEIGHT /2)));
+        double xt = point.pos_x - (AppConstants.TEXTVIEW_POSITION_X[5] + AppConstants.TEXTVIEW_WIDTH /2);
+        double yt = point.pos_y - (AppConstants.TEXTVIEW_POSITION_Y[5] + AppConstants.TEXTVIEW_HEIGHT /2);
+        int strength = (int)Math.sqrt(xt * xt + yt * yt);
+        xt = AppConstants.TEXTVIEW_POSITION_X[1] - (AppConstants.TEXTVIEW_POSITION_X[5] + AppConstants.TEXTVIEW_WIDTH /2);
+        yt = AppConstants.TEXTVIEW_POSITION_Y[1] - (AppConstants.TEXTVIEW_POSITION_Y[5] + AppConstants.TEXTVIEW_HEIGHT /2);
+        int complement = (int)(Math.sqrt(xt * xt + yt * yt));
         Log.d("IdentifyAction: ", "SEARCHING FOR FIVE VIBRATING");
-        vibrate.vibrate(1, strength/10, (complement > strength)?(complement - strength)/10:0);
+        //vibrate.vibrate(10, strength/10, (complement > strength)?(complement - strength)/10:0);
     }
 
 
