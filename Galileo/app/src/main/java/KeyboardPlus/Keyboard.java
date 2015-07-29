@@ -11,7 +11,7 @@ import java.io.Serializable;
  */
 public class Keyboard implements Serializable
 {
-    static int minPresses = 50;
+    static int minPresses = 20;
     public Touch getKey(int i)
     {
         Touch t = new Touch();
@@ -37,9 +37,9 @@ public class Keyboard implements Serializable
         key = new RollingBuffer[nKeys];
         for (int i = 0; i < nKeys; i++)
         {
-            key[i] = new RollingBuffer(minPresses * 20);
+            key[i] = new RollingBuffer(1000);
             //burn in
-            for(int j = 0; j < 2 * minPresses; j++)
+            for(int j = 0; j < 10; j++)
             {
                 key[i].insert(AppConstants.TEXTVIEW_POSITION_X[i], AppConstants.TEXTVIEW_POSITION_Y[i]);
             }
@@ -56,7 +56,7 @@ public class Keyboard implements Serializable
         double xSD = Math.sqrt(xVar);
         double ySD = Math.sqrt(yVar);
         double rho2 = coVar * coVar/ (xVar * yVar);
-        if(rho2 - 1 == 0)
+        if(rho2 >= 1)
         {
             return -1;
         }
@@ -86,16 +86,16 @@ public class Keyboard implements Serializable
             //min key
             if(dist2(touch, key[i].getxMean(), key[i].getyMean()) < AppConstants.MIN_KEY_RADIUS)
             {
-                return i;
+                //return i;
             }
             probability = gaussian2(touch.pos_x, touch.pos_y, key[i].getxMean(), key[i].getyMean(), key[i].getxVar(), key[i].getyVar(), key[i].getCoVar());
 
             //fallback to hard keys
             if(key[i].getCount() < minPresses || probability < 0)
             {
-                for (int j = 0; i < key.length; i++)
+                for (int j = 0; j < key.length; j++)
                 {
-                    if(touch.pos_x > AppConstants.TEXTVIEW_POSITION_X[j] && touch.pos_y > AppConstants.TEXTVIEW_POSITION_Y[j] && touch.pos_x < (AppConstants.TEXTVIEW_POSITION_X[j] + AppConstants.TEXTVIEW_WIDTH) && touch.pos_y < (AppConstants.TEXTVIEW_POSITION_Y[j] + AppConstants.TEXTVIEW_WIDTH))
+                    if(touch.pos_x > AppConstants.TEXTVIEW_POSITION_X[j] && touch.pos_y > AppConstants.TEXTVIEW_POSITION_Y[j] && touch.pos_x < (AppConstants.TEXTVIEW_POSITION_X[j] + AppConstants.TEXTVIEW_WIDTH) && touch.pos_y < (AppConstants.TEXTVIEW_POSITION_Y[j] + AppConstants.TEXTVIEW_HEIGHT))
                         return j;
                 }
                 return 11;

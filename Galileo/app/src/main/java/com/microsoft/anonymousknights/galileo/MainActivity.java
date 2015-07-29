@@ -272,7 +272,7 @@ public class MainActivity extends AppCompatActivity{
         textView = (TextView) findViewById(R.id.TextViewAsterisk);
         textView.getLocationOnScreen(location);
         AppConstants.TEXTVIEW_POSITION_X[10] = location[0];
-        AppConstants.TEXTVIEW_POSITION_X[10] = location[1];
+        AppConstants.TEXTVIEW_POSITION_Y[10] = location[1];
 
         textView = (TextView) findViewById(R.id.TextView0);
         textView.getLocationOnScreen(location);
@@ -282,7 +282,9 @@ public class MainActivity extends AppCompatActivity{
         textView = (TextView) findViewById(R.id.TextViewSharp);
         textView.getLocationOnScreen(location);
         AppConstants.TEXTVIEW_POSITION_X[11] = location[0];
-        AppConstants.TEXTVIEW_POSITION_X[11] = location[1];
+        AppConstants.TEXTVIEW_POSITION_Y[11] = location[1];
+
+        AppConstants.keyboard = new Keyboard(12);
 
         Log.d("galileo_mytag", AppConstants.TEXTVIEW_POSITION_X[5] + "--------------" + AppConstants.TEXTVIEW_POSITION_Y[5]);
     }

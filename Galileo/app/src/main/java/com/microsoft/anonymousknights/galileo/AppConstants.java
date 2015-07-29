@@ -40,7 +40,7 @@ public class AppConstants {
     public static final int SMSAction = 1102;
     public static final int EmailAction = 1103;
 
-    public static Keyboard keyboard = new Keyboard(12);
+    public static Keyboard keyboard;
 
 
     /*

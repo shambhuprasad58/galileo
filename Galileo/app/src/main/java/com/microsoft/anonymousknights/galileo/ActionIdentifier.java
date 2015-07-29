@@ -31,6 +31,8 @@ public class ActionIdentifier {
 
     public static void IdentifyAction(BlockingDeque<Touch> SenseDataList, BlockingQueue<ActionData> ActionDataList, Vibrator vibrator, TextToSpeech speech)
     {
+        Touch start = null;
+        Touch end = null;
         ActionData data;
         while(true)
         {
@@ -49,10 +51,15 @@ public class ActionIdentifier {
             }
             else
             {
-                if(touch.type == MotionEvent.ACTION_UP) {
+                if(touch.type == MotionEvent.ACTION_DOWN)
+                {
+                    start = touch;
+                }
+                if(touch.type == MotionEvent.ACTION_UP)
+                {
                     Log.d("IdentifyAction: ", "Not SEARCHING FOR FIVE");
-                    Touch end = touch;
-                    Touch start = SenseDataList.pollLast();
+                    end = touch;
+                    //Touch start = SenseDataList.pollLast();
                     SenseDataList.clear();
                     if(start == null || end == null)
                         continue;
@@ -65,6 +72,7 @@ public class ActionIdentifier {
                         data.nextAction = getMoveDirection(start, end);
                         if(data.nextAction == AppConstants.SwipeDirectionUp) {
                             searchingForFive = true;
+                            start = null;
                             continue;
                         }
 
@@ -78,6 +86,7 @@ public class ActionIdentifier {
                         data.nextAction = AppConstants.LongPress;
                     }
                     ActionDataList.add(data);
+                    start = null;
                 }
             }
         }
