@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.LinkedList;
@@ -27,7 +28,7 @@ public class KeyboardFSM {
     private static char previousKey = '.';
     private static String SMSName, SMSNumber, SMSText;
     private static String EmailId, EmailSubject, EmailBody;
-    private static boolean T9typingMode = true;      //true for T9, false for english
+    private static boolean T9typingMode = false;      //true for T9, false for english
     private static int tapCount = 1;
     /*
     static String[] digit=
@@ -249,6 +250,10 @@ public class KeyboardFSM {
     }
     public static void Call(String name, String number, Context context, TextToSpeech speech)
     {
+        if(number == null || number.equalsIgnoreCase("")) {
+            speech.speak("NO NUMBER DIALED", TextToSpeech.QUEUE_FLUSH, null);
+            return;
+        }
         try {
             if(name == null)
             {
@@ -279,6 +284,10 @@ public class KeyboardFSM {
 
     public static void SMS(Context context, TextToSpeech speech)
     {
+        if(SMSNumber == null || SMSNumber.equalsIgnoreCase("")) {
+            speech.speak("NO NUMBER DIALED", TextToSpeech.QUEUE_FLUSH, null);
+            return;
+        }
         try {
             if(SMSName == null)
             {
@@ -306,6 +315,10 @@ public class KeyboardFSM {
 
     public static void EMAIL(Context context, TextToSpeech speech)
     {
+        if(EmailId == null || EmailId.equalsIgnoreCase("") || !isValidEmail(EmailId)) {
+            speech.speak("INVALID EMAIL ID", TextToSpeech.QUEUE_FLUSH, null);
+            return;
+        }
         try {
             speech.speak("SENDING EMAIL TO " + EmailId, TextToSpeech.QUEUE_FLUSH, null);
             try {
@@ -326,5 +339,9 @@ public class KeyboardFSM {
         } catch (ActivityNotFoundException activityException) {
             Log.e("galileo_mytag", "Call failed", activityException);
         }
+    }
+
+    public final static boolean isValidEmail(String target) {
+        return !TextUtils.isEmpty(target) && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 }

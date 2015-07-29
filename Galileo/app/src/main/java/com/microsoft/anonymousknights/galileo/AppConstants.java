@@ -46,6 +46,8 @@ public class AppConstants {
     public static final int enteringNumbers = 1202;
     public static final int announcingResults = 1203;
 
+    public static String currentActionSpeech;
+
 
     /*
     public static float TEXTVIEW1_POSITION_Y;

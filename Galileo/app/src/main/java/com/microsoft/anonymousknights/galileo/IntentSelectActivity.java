@@ -47,11 +47,11 @@ public class IntentSelectActivity extends AppCompatActivity {
                     int action = ActionIdentifier.getMoveDirection(DOWN, UP);
                     switch(action)
                     {
-                        case AppConstants.SwipeDirectionRight: AppConstants.CurrentAction = AppConstants.CallAction; break;
-                        case AppConstants.SwipeDirectionLeft: AppConstants.CurrentAction = AppConstants.SMSAction; break;
+                        case AppConstants.SwipeDirectionRight: AppConstants.CurrentAction = AppConstants.CallAction; AppConstants.currentActionSpeech = "CALL"; break;
+                        case AppConstants.SwipeDirectionLeft: AppConstants.CurrentAction = AppConstants.SMSAction; AppConstants.currentActionSpeech = "SMS"; break;
                         case AppConstants.SwipeDirectionUp:  AppConstants.speech.speak("Swipe up is invalid input.", TextToSpeech.QUEUE_FLUSH, null); //Invalid input
                                                                 break;
-                        case AppConstants.SwipeDirectionDown: AppConstants.CurrentAction = AppConstants.EmailAction; break;
+                        case AppConstants.SwipeDirectionDown: AppConstants.CurrentAction = AppConstants.EmailAction; AppConstants.currentActionSpeech = "EMAIL"; break;
                     }
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                     startActivity(intent);

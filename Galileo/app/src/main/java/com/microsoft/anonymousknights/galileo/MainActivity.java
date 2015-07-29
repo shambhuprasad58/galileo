@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity{
                     }
                 }
                 finish();
-                System.exit(0);
+                //System.exit(0);
             }
         });
         Intent checkIntent = new Intent();
@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity{
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        AppConstants.speech.speak("Hello folks, welcome to CALL.",
+        AppConstants.speech.speak("LETS " + AppConstants.currentActionSpeech,
                 TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
                 null);
         createThreads();
