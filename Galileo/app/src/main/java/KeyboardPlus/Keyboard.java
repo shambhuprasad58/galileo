@@ -86,15 +86,15 @@ public class Keyboard implements Serializable
         for (int i = 0; i < key.length; i++)
         {
             //min key
-            if(dist2(touch, key[i].getxMean(), key[i].getyMean()) < AppConstants.MIN_KEY_RADIUS)
+            if(dist2(touch, AppConstants.TEXTVIEW_WIDTH, AppConstants.TEXTVIEW_HEIGHT) < AppConstants.MIN_KEY_RADIUS)
             {
                 return i;
             }
             probability = gaussian2(touch.pos_x, touch.pos_y, key[i].getxMean(), key[i].getyMean(), key[i].getxVar(), key[i].getyVar(), key[i].getCoVar());
 
             //fallback to hard keys
-            //if(key[i].getCount() < minPresses || probability < 0)
-            if(true)
+            if(key[i].getCount() < minPresses || probability < 0)
+            //if(true)
             {
                 for (int j = 0; j < key.length; j++)
                 {

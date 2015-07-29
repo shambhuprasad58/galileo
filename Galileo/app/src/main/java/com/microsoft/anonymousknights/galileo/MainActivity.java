@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity{
                 File fl = new File(getApplicationContext().getCacheDir(), "keyboard++");
                 FileInputStream fi = new FileInputStream(fl);
                 ObjectInputStream in = new ObjectInputStream(fi);
-                kpp = (Keyboard)in.readObject();
+                AppConstants.keyboard = (Keyboard)in.readObject();
                 in.close();
                 fi.close();
             }
@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity{
                         fo.close();
                         fo = new FileOutputStream(new File(getApplicationContext().getCacheDir(), "keyboard++"));
                         oout = new ObjectOutputStream(fo);
-                        oout.writeObject(kpp);
+                        oout.writeObject(AppConstants.keyboard);
                         oout.close();
                         fo.close();
                     } catch (Exception e) {
@@ -172,6 +172,26 @@ public class MainActivity extends AppCompatActivity{
     protected void onStart() {
         super.onStart();
 
+    }
+
+    @Override
+    protected  void onDestroy()
+    {
+        super.onDestroy();
+        try {
+            FileOutputStream fo = new FileOutputStream(new File(getApplicationContext().getCacheDir(), "cachefile"));
+            ObjectOutputStream oout = new ObjectOutputStream(fo);
+            oout.writeObject(T9WordDictionary);
+            oout.close();
+            fo.close();
+            fo = new FileOutputStream(new File(getApplicationContext().getCacheDir(), "keyboard++"));
+            oout = new ObjectOutputStream(fo);
+            oout.writeObject(AppConstants.keyboard);
+            oout.close();
+            fo.close();
+        } catch (Exception e) {
+            Log.d("Galileo", "Warning: Could not save word dictionary");
+        }
     }
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
