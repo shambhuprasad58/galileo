@@ -75,12 +75,19 @@ public class MainActivity extends AppCompatActivity{
             try {
                 InputStream in = this.getAssets().open("wordDict.txt");
                 String tmpstring;
+                int tmpx = 0;
                 BufferedReader r = new BufferedReader(new InputStreamReader(in));
                 do {
                     tmpstring = r.readLine();
                     if(tmpstring != null)
                     {
                         new ContactData(tmpstring, null, T9WordDictionary);
+                        
+                        if((tmpx/100) != ((tmpx + 1)/100))
+                        {
+                            Log.d("Dictionary Load:", " " + tmpx);
+                        }
+                        tmpx++;
                     }
                 }while (tmpstring != null);
                 //System.out.println(tmpstring);

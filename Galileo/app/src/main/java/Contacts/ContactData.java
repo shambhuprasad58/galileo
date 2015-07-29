@@ -64,8 +64,8 @@ public class ContactData implements Serializable
 
         name = s1;
         number = s2;
-        Log.d("---Contact Indo:", name);
-        Log.d("---Contact Indo:", number);
+        //Log.d("---Contact Indo:", name);
+        //Log.d("---Contact Indo:", number);
 
         String name_t9format = "";
         int nameLen = name.length();
@@ -125,8 +125,7 @@ public class ContactData implements Serializable
                 case 'Y':
                 case 'z':
                 case 'Z':name_t9format += 9;break;
-
-
+                default:name_t9format += 1;break;
             }
         }
         t9.addToDictionary(name_t9format, this);
