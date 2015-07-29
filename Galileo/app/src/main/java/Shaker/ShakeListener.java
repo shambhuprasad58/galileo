@@ -27,7 +27,7 @@ public class ShakeListener implements SensorListener
     private long mLastTime;
     private OnShakeListener mShakeListener;
     private Context mContext;
-    private int mShakeCount = 0;
+    public int mShakeCount = 0;
     private long mLastShake;
     private long mLastForce;
 

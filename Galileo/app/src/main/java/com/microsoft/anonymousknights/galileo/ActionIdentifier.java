@@ -1,23 +1,13 @@
 package com.microsoft.anonymousknights.galileo;
 
-import android.annotation.SuppressLint;
-import android.content.ActivityNotFoundException;
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.MotionEvent;
 
-import Contacts.ContactData;
-
-import java.util.LinkedList;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
-import T9.T9;
 import Vibrate.Vibrate;
 
 /**
@@ -27,7 +17,7 @@ public class ActionIdentifier {
 
     private static final int LongPressThresholdTime = 200;
     private static final int MoveThresholdPos = 200;
-    private static boolean searchingForFive = true;
+    public static boolean searchingForFiveStateVariable = true;
 
     public static void IdentifyAction(BlockingDeque<Touch> SenseDataList, BlockingQueue<ActionData> ActionDataList, Vibrator vibrator, TextToSpeech speech)
     {
@@ -44,7 +34,7 @@ public class ActionIdentifier {
                 e.printStackTrace();
                 return;
             }
-            if(searchingForFive)
+            if(searchingForFiveStateVariable)
             {
                 //Log.d("IdentifyAction: ", "SEARCHING FOR FIVE");
                 SenseDataList.clear();
@@ -72,7 +62,8 @@ public class ActionIdentifier {
                         //Move Action
                         data.nextAction = getMoveDirection(start, end);
                         if(data.nextAction == AppConstants.SwipeDirectionUp) {
-                            searchingForFive = true;
+                            speech.speak("SEARCH 5", TextToSpeech.QUEUE_FLUSH, null);
+                            searchingForFiveStateVariable = true;
                             start = null;
                             continue;
                         }
@@ -113,7 +104,7 @@ public class ActionIdentifier {
         Log.d("IdentifyAction: ", "SEARCHING FOR FIVE STARTING " + AppConstants.TEXTVIEW_POSITION_X[5] + ":" + AppConstants.TEXTVIEW_WIDTH + ":" + AppConstants.TEXTVIEW_POSITION_Y[5] + ":" + AppConstants.TEXTVIEW_HEIGHT + ":");
         if(point.pos_x > (AppConstants.TEXTVIEW_POSITION_X[5] + (AppConstants.TEXTVIEW_WIDTH /4)) && point.pos_x < (AppConstants.TEXTVIEW_POSITION_X[5] + (3*AppConstants.TEXTVIEW_WIDTH /4)) && point.pos_y > (AppConstants.TEXTVIEW_POSITION_Y[5] + (AppConstants.TEXTVIEW_HEIGHT /4)) && point.pos_y < (AppConstants.TEXTVIEW_POSITION_Y[5] + (3*AppConstants.TEXTVIEW_HEIGHT /4))) {
             speech.speak("5 FOUND. START TYPING", TextToSpeech.QUEUE_FLUSH, null);
-            searchingForFive = false;
+            searchingForFiveStateVariable = false;
             Log.d("IdentifyAction: ", "FIVE FOUND ");
             return;
         }

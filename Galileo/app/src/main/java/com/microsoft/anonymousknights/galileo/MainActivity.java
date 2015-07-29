@@ -213,6 +213,7 @@ public class MainActivity extends AppCompatActivity{
         AppConstants.speech.speak("LETS " + AppConstants.currentActionSpeech,
                 TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
                 null);
+        AppConstants.speech.speak("SEARCH 5", TextToSpeech.QUEUE_FLUSH, null);
         createThreads();
         retrievePositions();
     }
@@ -236,10 +237,6 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void run() {
                 try {
-                    if(AppConstants.CurrentAction == AppConstants.EmailAction)
-                        KeyboardFSM.T9Dictioary = T9WordDictionary;
-                    else
-                        KeyboardFSM.T9Dictioary = T9ContactDictionary;
                     KeyboardFSM.FSM(ActionDataList, vibrator, AppConstants.speech, T9ContactDictionary, T9WordDictionary, mContext);
                 } catch (Exception e) {
                     e.printStackTrace();

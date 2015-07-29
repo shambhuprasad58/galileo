@@ -26,7 +26,7 @@ public class AppConstants {
     public static final int EmailSubjectMode = 7;
     public static final int EmailBodyMode = 8;
 
-    public static final int doubleTapThreshold = 800;       //in millisecond
+    public static final int doubleTapThreshold = 2000;       //in millisecond
 
     public static final int SwipeDirectionUp = 1001;
     public static final int SwipeDirectionDown = 1002;

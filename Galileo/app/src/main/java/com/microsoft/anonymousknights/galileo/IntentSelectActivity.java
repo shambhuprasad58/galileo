@@ -24,6 +24,8 @@ public class IntentSelectActivity extends AppCompatActivity {
     ShakeListener mShaker;
     Touch DOWN = null;
     private static final int MY_DATA_CHECK_CODE = 1234;
+    private static final int MAIN_ACTIVITY_CHECK_CODE = 1235;
+    private static boolean MAIN_ACTIVITY_BACK = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,8 +55,9 @@ public class IntentSelectActivity extends AppCompatActivity {
                                                                 break;
                         case AppConstants.SwipeDirectionDown: AppConstants.CurrentAction = AppConstants.EmailAction; AppConstants.currentActionSpeech = "EMAIL"; break;
                     }
+                    ActionIdentifier.searchingForFiveStateVariable = true;
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(intent);
+                    startActivityForResult(intent, MAIN_ACTIVITY_CHECK_CODE);
                 }
                 return true;
             }
@@ -65,6 +68,13 @@ public class IntentSelectActivity extends AppCompatActivity {
             public void onShake()
             {
                 //vibrator.vibrate(100);
+                if(MAIN_ACTIVITY_BACK)
+                {
+                    Log.d("galileo_mytag", "IGNORING CLOSE APP");
+                    MAIN_ACTIVITY_BACK = false;
+                    mShaker.mShakeCount = 0;
+                    return;
+                }
                 if(AppConstants.speech != null)
                 {
                     AppConstants.speech.speak("Closing Application. Thank You.", TextToSpeech.QUEUE_FLUSH, null);
@@ -135,6 +145,11 @@ public class IntentSelectActivity extends AppCompatActivity {
                         TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
                 startActivity(installIntent);
             }
+        }
+        else if(requestCode == MAIN_ACTIVITY_CHECK_CODE)
+        {
+            Log.d("galileo_mytag", "MAIN_ACTIVITY_BACK: TRUE");
+            MAIN_ACTIVITY_BACK = true;
         }
     }
 }

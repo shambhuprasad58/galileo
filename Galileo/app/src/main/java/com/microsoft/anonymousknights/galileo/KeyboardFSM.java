@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
+import android.telephony.SmsManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -26,9 +27,9 @@ public class KeyboardFSM {
     private static LinkedList<ContactData> list;
     private static long previousTapTime = System.currentTimeMillis();
     private static char previousKey = '.';
-    private static String SMSName, SMSNumber, SMSText;
-    private static String EmailId, EmailSubject, EmailBody;
-    private static boolean T9typingMode = false;      //true for T9, false for english
+    private static String SMSName = "", SMSNumber, SMSText = "";
+    private static String EmailId = "", EmailSubject = "", EmailBody = "";
+    private static boolean T9typingMode = true;      //true for T9, false for english
     private static int tapCount = 1;
     /*
     static String[] digit=
@@ -65,8 +66,8 @@ public class KeyboardFSM {
             };
     static char[][] chars=
             {
-                    {'0'},
-                    {'1'},
+                    {'0', ' '},
+                    {'1','.',',','@'},
                     {'2', 'A', 'B', 'C'},
                     {'3', 'D', 'E', 'F'},
                     {'4', 'G', 'H', 'I'},
@@ -74,19 +75,35 @@ public class KeyboardFSM {
                     {'6', 'M', 'N', 'O'},
                     {'7', 'P', 'Q', 'R', 'S'},
                     {'8', 'T', 'U', 'V'},
-                    {'9', 'W', 'X', 'Y', 'Z'},
+                    {'9', 'W', 'X', 'Y', 'Z'}
             };
 
-    public static void FSM(BlockingQueue<ActionData> ActionDataList, Vibrator vibrator, TextToSpeech speech, T9 T9ContactDictioary, T9 T9WordDictioary, Context context)
+    static String[][] speechchars=
+            {
+                    {"0", "space"},
+                    {"1", "dot", "comma", "AT THE RATE"},
+                    {"2", "A", "B", "C"},
+                    {"3", "D", "E", "F"},
+                    {"4", "G", "H", "I"},
+                    {"5", "J", "K", "L"},
+                    {"6", "M", "N", "O"},
+                    {"7", "P", "Q", "R", "S"},
+                    {"8", "T", "U", "V"},
+                    {"9", "W", "X", "Y", "Z"},
+                    {"hash"}
+            };
+
+    public static void FSM(BlockingQueue<ActionData> ActionDataList, Vibrator vibrator, TextToSpeech speech, T9 T9ContactDictionary, T9 T9WordDictionary, Context context)
     {
         int nextAction;
         char nextChar;
         int count = 0;
+        T9Dictioary = T9ContactDictionary;
         switch (AppConstants.CurrentAction)
         {
             case AppConstants.CallAction: mode = AppConstants.CallMode; break;
             case AppConstants.SMSAction: mode = AppConstants.SMSContactMode; break;
-            case AppConstants.EmailAction: mode = AppConstants.EmailIdMode; break;
+            case AppConstants.EmailAction: mode = AppConstants.EmailIdMode; T9typingMode = false; T9Dictioary = T9WordDictionary; break;
         }
         String currentString = "";
         while(true) {
@@ -152,7 +169,8 @@ public class KeyboardFSM {
                                 SMSName = null;
                                 SMSNumber = currentString;
                                 mode = AppConstants.SMSTextMode;
-                                T9Dictioary = T9WordDictioary;
+                                T9Dictioary = T9WordDictionary;
+                                speech.speak("ENTER SMS TEXT", TextToSpeech.QUEUE_FLUSH, null);
                                 break;
                             case AppConstants.SMSTextMode:
                                 SMSText = SMSText.concat(" " + currentString);
@@ -160,16 +178,19 @@ public class KeyboardFSM {
                             case AppConstants.EmailIdMode:
                                 EmailId = currentString;
                                 mode = AppConstants.EmailSubjectMode;
+                                speech.speak("ENTER EMAIL SUBJECT", TextToSpeech.QUEUE_FLUSH, null);
                                 break;
                             case AppConstants.EmailSubjectMode:
                                 EmailSubject = EmailSubject.concat(" " + currentString);
                                 mode = AppConstants.EmailBodyMode;
+                                speech.speak("Enter Email Body", TextToSpeech.QUEUE_FLUSH, null);
                                 break;
                             case AppConstants.EmailBodyMode:
                                 EmailBody = EmailBody.concat(currentString);
                                 EMAIL(context, speech);
                                 break;
                         }
+                    currentString = "";
                     break;
                 case AppConstants.LongPress:
                         if(T9typingMode) {
@@ -179,17 +200,49 @@ public class KeyboardFSM {
                         switch (mode)
                         {
                             case AppConstants.CallMode: Call(null, currentString, context, speech); break;
-                            case AppConstants.SMSContactMode: SMSName = null; SMSNumber = currentString; mode = AppConstants.SMSTextMode; break;
+                            case AppConstants.SMSContactMode: SMSName = null; SMSNumber = currentString; mode = AppConstants.SMSTextMode;
+                                                                speech.speak("ENTER SMS TEXT", TextToSpeech.QUEUE_FLUSH, null);
+                                                                break;
                             case AppConstants.SMSTextMode: SMSText = SMSText + currentString; SMS(context, speech); break;
-                            case AppConstants.EmailIdMode: EmailId = currentString; mode = AppConstants.EmailSubjectMode; break;
-                            case AppConstants.EmailSubjectMode: EmailBody = EmailBody + currentString; mode = AppConstants.EmailBodyMode; break;
-                            case AppConstants.EmailBodyMode: EMAIL(context, speech); break;
+                            case AppConstants.EmailIdMode: EmailId = currentString; mode = AppConstants.EmailSubjectMode;
+                                                                speech.speak("ENTER EMAIL SUBJECT", TextToSpeech.QUEUE_FLUSH, null);
+                                                                break;
+                            case AppConstants.EmailSubjectMode: EmailSubject = EmailSubject + currentString; mode = AppConstants.EmailBodyMode;
+                                                                speech.speak("Enter Email Body", TextToSpeech.QUEUE_FLUSH, null);
+                                                                break;
+                            case AppConstants.EmailBodyMode: EmailSubject = EmailSubject + currentString; EMAIL(context, speech); break;
                         }
+                    currentString = "";
                     break;
                 case AppConstants.SingleClick:
                     //Single Click
                     if (PageStatus == AppConstants.enteringNumbers) {
                         //Next number
+                        if(nextChar == ';')
+                        {
+                            if(mode == AppConstants.SMSTextMode || mode == AppConstants.EmailBodyMode || mode == AppConstants.EmailSubjectMode) {
+                                speech.speak("CHANGING DICTIONARY MODE", TextToSpeech.QUEUE_FLUSH, null);
+                                if (T9typingMode) {
+                                    currentString = T9Dictioary.getCurrentString();
+                                    T9Dictioary.clear();
+                                    T9typingMode = false;
+                                } else
+                                    T9typingMode = true;
+                                switch (mode) {
+                                    case AppConstants.SMSTextMode:
+                                        SMSText = SMSText.concat(currentString);
+                                        break;
+                                    case AppConstants.EmailSubjectMode:
+                                        EmailSubject = EmailSubject.concat(currentString);
+                                        break;
+                                    case AppConstants.EmailBodyMode:
+                                        EmailBody = EmailBody.concat(currentString);
+                                        break;
+                                }
+                                currentString = "";
+                                break;
+                            }
+                        }
                         if (T9typingMode) {
                             Log.d("galileo_mytag ", "T9  TAPPPPPEDDDD ");
                             count = T9Dictioary.filter(nextChar);
@@ -199,17 +252,20 @@ public class KeyboardFSM {
                                 //T9Dictioary.filter('\b');
                                 //count = T9Dictioary.filter(chars[nextChar][tapCount]);
                                 //speech.speak(chars[nextChar][tapCount] + ". " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
-                                Log.d("galileo_mytag ", "ENGLISH  MULTI TAPPPPPEDDDD " + chars[nextChar][tapCount]);
+                                Log.d("galileo_mytag ", "ENGLISH  MULTI TAPPPPPEDDDD " + speechchars[nextChar - '0'][tapCount]);
+                                tapCount = (tapCount + 1) % chars[nextChar - '0'].length;
                                 currentString = currentString.substring(0, currentString.length()-1);
-                                currentString = currentString + chars[nextChar][tapCount];
-                                tapCount = (tapCount + 1) % chars[nextChar].length;
+                                currentString = currentString + chars[nextChar - '0'][tapCount];
+                                speech.speak(speechchars[nextChar - '0'][tapCount], TextToSpeech.QUEUE_ADD, null);
                             } else {
                                 //count = T9Dictioary.filter(nextChar);
                                 //speech.speak(digit[nextChar - '0'] + ". " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
-                                Log.d("galileo_mytag ", "ENGLISH NEW TAPPPPPEDDDD " + chars[nextChar][tapCount]);
-                                currentString = currentString + chars[nextChar][1];
                                 tapCount = 1;
+                                Log.d("galileo_mytag ", "ENGLISH NEW TAPPPPPEDDDD " + chars[nextChar - '0'][1]);
+                                currentString = currentString + chars[nextChar - '0'][1];
+                                speech.speak(speechchars[nextChar - '0'][tapCount], TextToSpeech.QUEUE_FLUSH, null);
                             }
+                            previousKey = nextChar;
                             previousTapTime = System.currentTimeMillis();
                         }
                     } else if (PageStatus == AppConstants.announcingResults) {
@@ -217,6 +273,7 @@ public class KeyboardFSM {
                         Log.d("galileo_mytag ", "ANNOUNCING RESULTS CALLING");
                         T9Dictioary.clear();
                         ContactData contact = list.get(nextChar - '0' - 1);
+                        PageStatus = AppConstants.enteringNumbers;
                         switch (mode) {
                             case AppConstants.CallMode:
                                 Call(contact.getName(), contact.getNumber(), context, speech);
@@ -226,21 +283,26 @@ public class KeyboardFSM {
                                 SMSName = contact.getName();
                                 SMSNumber = contact.getNumber();
                                 mode = AppConstants.SMSTextMode;
-                                T9Dictioary = T9WordDictioary;
+                                T9Dictioary = T9WordDictionary;
+                                speech.speak(SMSName + " selected. ENTER SMS TEXT", TextToSpeech.QUEUE_FLUSH, null);
                                 T9Dictioary.clear();
                                 break;
                             case AppConstants.SMSTextMode:
                                 SMSText = SMSText.concat(contact.getName());
+                                speech.speak(contact.getName() + "SELECTED", TextToSpeech.QUEUE_FLUSH, null);
                                 break;
                             case AppConstants.EmailIdMode:
                                 EmailId = contact.getName();
+                                speech.speak(EmailId + " is email id. ENTER SUBJECT TEXT", TextToSpeech.QUEUE_FLUSH, null);
                                 mode = AppConstants.EmailSubjectMode;
                                 break;
                             case AppConstants.EmailSubjectMode:
                                 EmailSubject = EmailSubject.concat(contact.getName());
+                                speech.speak(contact.getName() + "SELECTED", TextToSpeech.QUEUE_FLUSH, null);
                                 break;
                             case AppConstants.EmailBodyMode:
                                 EmailBody = EmailBody.concat(contact.getName());
+                                speech.speak(contact.getName() + "SELECTED", TextToSpeech.QUEUE_FLUSH, null);
                                 break;
                         }
                     }
@@ -306,10 +368,16 @@ public class KeyboardFSM {
             Log.d("galileo_mytag", "CONTACT NUMBER BEFORE:::: " + SMSNumber);
             SMSNumber = (SMSNumber.replace(':', '*'));
             SMSNumber = (SMSNumber.replace(';', '#'));
+            SMSNumber = (SMSNumber.replace(" ", ""));
             Log.d("galileo_mytag", "CONTACT NUMBER AFTER:::: " + SMSNumber);
-            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.fromParts(SMSText, SMSNumber, null)));
+//            Intent sendIntent = new Intent(Intent.ACTION_VIEW);
+//            sendIntent.putExtra(SMSText, "default content");
+//            sendIntent.setType("vnd.android-dir/mms-sms");
+//            context.startActivity(sendIntent);
+            SmsManager smsManager = SmsManager.getDefault();
+            smsManager.sendTextMessage(SMSNumber, null, SMSText, null, null);
         } catch (ActivityNotFoundException activityException) {
-            Log.e("galileo_mytag", "Call failed", activityException);
+            Log.e("galileo_mytag", "SMS failed", activityException);
         }
     }
 
@@ -337,7 +405,7 @@ public class KeyboardFSM {
             i.putExtra(Intent.EXTRA_TEXT , EmailBody);
             context.startActivity(i);
         } catch (ActivityNotFoundException activityException) {
-            Log.e("galileo_mytag", "Call failed", activityException);
+            Log.e("galileo_mytag", "EMAIL failed", activityException);
         }
     }
 
