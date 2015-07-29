@@ -124,8 +124,9 @@ public class Keyboard implements Serializable
     {
         if(lastKey >= 0)
         {
-            lastKey = -1;
             this.key[lastKey].back();
+            this.key[lastKey].insert(this.key[lastKey].xMean, this.key[lastKey].yMean);
+            lastKey = -1;
         }
     }
 }
