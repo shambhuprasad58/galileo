@@ -66,6 +66,14 @@ public class T9 implements Serializable
             return 0;
         return node.getSubTreeSize();
     }
+
+    public LinkedList<ContactData> getNodeList()
+    {
+        LinkedList<ContactData> list = new LinkedList<ContactData>();
+        list.addAll(dictionary.getHead().getEntries());
+        return list;
+    }
+
     public LinkedList<ContactData> traverseDictionary()
     {
         LinkedList<ContactData> masterList = new LinkedList<ContactData>();
