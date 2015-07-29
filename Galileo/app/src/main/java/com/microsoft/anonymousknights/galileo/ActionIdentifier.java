@@ -29,7 +29,7 @@ public class ActionIdentifier {
     private static final int MoveThresholdPos = 200;
     private static boolean searchingForFive = true;
 
-    public static int IdentifyAction(BlockingDeque<Touch> SenseDataList, BlockingQueue<ActionData> ActionDataList, Vibrator vibrator, TextToSpeech speech)
+    public static void IdentifyAction(BlockingDeque<Touch> SenseDataList, BlockingQueue<ActionData> ActionDataList, Vibrator vibrator, TextToSpeech speech)
     {
         ActionData data;
         while(true)
@@ -72,12 +72,12 @@ public class ActionIdentifier {
         if(Math.abs(end.pos_x - start.pos_x) > Math.abs(end.pos_y - start.pos_y))
         {
             if(end.pos_x > start.pos_x)
-                return AppConstants.SwipeDirectionDown;
-            return AppConstants.SwipeDirectionDown;
+                return AppConstants.SwipeDirectionRight;
+            return AppConstants.SwipeDirectionLeft;
         }
         if(end.pos_y > start.pos_y)
             return AppConstants.SwipeDirectionDown;
-        return AppConstants.SwipeDirectionDown;
+        return AppConstants.SwipeDirectionUp;
 
     }
 

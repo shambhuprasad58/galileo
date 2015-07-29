@@ -146,6 +146,8 @@ public class MainActivity extends AppCompatActivity{
                 System.exit(0);
             }
         });
+        retrievePositions();
+        createThreads();
     }
 
     @Override
@@ -161,14 +163,14 @@ public class MainActivity extends AppCompatActivity{
         super.onPause();
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        retrievePositions();
-        AppConstants.speech.speak("Hello folks, welcome to galileo.",
-                TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
-                null);
-        createThreads();
-    }
+//    public void onActivityResult(int requestCode, int resultCode, Intent data)
+//    {
+//        retrievePositions();
+//        AppConstants.speech.speak("Hello folks, welcome to galileo.",
+//                TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
+//                null);
+//        createThreads();
+//    }
 
     public void createThreads()
     {
@@ -183,6 +185,7 @@ public class MainActivity extends AppCompatActivity{
             }
         };
         ActionThread.start();
+        ActionThread.getState().toString();
 
         Thread FSMThread = new Thread() {
             @Override
