@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity{
     ShakeListener mShaker;
     Keyboard kpp;
     Context mContext;
+    private static final int MY_DATA_CHECK_CODE = 1234;
 
 
     @SuppressLint("NewApi")
@@ -146,8 +147,12 @@ public class MainActivity extends AppCompatActivity{
                 System.exit(0);
             }
         });
-        retrievePositions();
-        createThreads();
+        Intent checkIntent = new Intent();
+        checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+        startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+
+//        retrievePositions();
+//        createThreads();
     }
 
     @Override
@@ -163,14 +168,20 @@ public class MainActivity extends AppCompatActivity{
         super.onPause();
     }
 
-//    public void onActivityResult(int requestCode, int resultCode, Intent data)
-//    {
-//        retrievePositions();
-//        AppConstants.speech.speak("Hello folks, welcome to galileo.",
-//                TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
-//                null);
-//        createThreads();
-//    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        AppConstants.speech.speak("Hello folks, welcome to CALL.",
+                TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
+                null);
+        createThreads();
+        retrievePositions();
+    }
 
     public void createThreads()
     {

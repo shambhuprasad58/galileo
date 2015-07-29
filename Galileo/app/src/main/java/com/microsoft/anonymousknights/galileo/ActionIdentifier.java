@@ -34,17 +34,28 @@ public class ActionIdentifier {
         ActionData data;
         while(true)
         {
-            Touch touch = SenseDataList.pop();
+            //Log.d("IdentifyAction: ", "WHILE TRUE");
+            Touch touch = null;
+            try {
+                touch = SenseDataList.take();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                return;
+            }
             if(searchingForFive)
             {
+                //Log.d("IdentifyAction: ", "SEARCHING FOR FIVE");
                 searchingForFive(touch, vibrator, speech);
             }
             else
             {
                 if(touch.type == MotionEvent.ACTION_UP) {
+                    Log.d("IdentifyAction: ", "Not SEARCHING FOR FIVE");
                     Touch end = touch;
                     Touch start = SenseDataList.pollLast();
                     SenseDataList.clear();
+                    if(start == null || end == null)
+                        continue;
                     Log.d("IdentifyAction: ", "ENTEREDDDDDDDDDD");
                     data = new ActionData();
                     data.nextChar = '.';
@@ -52,6 +63,11 @@ public class ActionIdentifier {
                         Log.d("IdentifyAction: ", "MOVEEEEEEEEEEEE");
                         //Move Action
                         data.nextAction = getMoveDirection(start, end);
+                        if(data.nextAction == AppConstants.SwipeDirectionUp) {
+                            searchingForFive = true;
+                            continue;
+                        }
+
 
                     } else if (start.timestamp - end.timestamp < LongPressThresholdTime) {
                         //Single Click
@@ -84,13 +100,17 @@ public class ActionIdentifier {
 
     public static void searchingForFive(Touch point, Vibrator vibrator, TextToSpeech speech)
     {
+        Log.d("IdentifyAction: ", "SEARCHING FOR FIVE STARTING " + AppConstants.TEXTVIEW_POSITION_X[5] + ":" + AppConstants.TEXTVIEW_WIDTH + ":" + AppConstants.TEXTVIEW_POSITION_Y[5] + ":" + AppConstants.TEXTVIEW_HEIGHT + ":");
         if(point.pos_x > (AppConstants.TEXTVIEW_POSITION_X[5] + (AppConstants.TEXTVIEW_WIDTH /4)) && point.pos_x < (AppConstants.TEXTVIEW_POSITION_X[5] + (3*AppConstants.TEXTVIEW_WIDTH /4)) && point.pos_y > (AppConstants.TEXTVIEW_POSITION_Y[5] + (AppConstants.TEXTVIEW_HEIGHT /4)) && point.pos_y < (AppConstants.TEXTVIEW_POSITION_Y[5] + (3*AppConstants.TEXTVIEW_HEIGHT /4))) {
             speech.speak("5 FOUND. START TYPING", TextToSpeech.QUEUE_FLUSH, null);
             searchingForFive = false;
+            Log.d("IdentifyAction: ", "FIVE FOUND ");
+            return;
         }
         Vibrate vibrate = new Vibrate(vibrator);
         int strength = (int)(Math.abs(point.pos_x - (AppConstants.TEXTVIEW_POSITION_X[5] + AppConstants.TEXTVIEW_WIDTH /2)) + Math.abs(point.pos_y - (AppConstants.TEXTVIEW_POSITION_Y[5] + AppConstants.TEXTVIEW_HEIGHT /2)));
         int complement = (int)(Math.abs(AppConstants.TEXTVIEW_POSITION_X[5] - (AppConstants.TEXTVIEW_POSITION_X[5] + AppConstants.TEXTVIEW_WIDTH /2)) + Math.abs(AppConstants.TEXTVIEW_POSITION_Y[5] - (AppConstants.TEXTVIEW_POSITION_Y[5] + AppConstants.TEXTVIEW_HEIGHT /2)));
+        Log.d("IdentifyAction: ", "SEARCHING FOR FIVE VIBRATING");
         vibrate.vibrate(1, strength/10, (complement > strength)?(complement - strength)/10:0);
     }
 
