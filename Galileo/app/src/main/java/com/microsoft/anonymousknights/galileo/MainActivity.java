@@ -74,9 +74,16 @@ public class MainActivity extends AppCompatActivity{
             T9WordDictionary = new T9();
             try {
                 InputStream in = this.getAssets().open("wordDict.txt");
+                String tmpstring;
                 BufferedReader r = new BufferedReader(new InputStreamReader(in));
-                String tmpstring = r.readLine();
-                System.out.println(tmpstring);
+                do {
+                    tmpstring = r.readLine();
+                    if(tmpstring != null)
+                    {
+                        new ContactData(tmpstring, null, T9WordDictionary);
+                    }
+                }while (tmpstring != null);
+                //System.out.println(tmpstring);
             }
             catch (IOException e2)
             {
