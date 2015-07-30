@@ -24,61 +24,66 @@ public class ActionIdentifier {
         Touch start = null;
         Touch end = null;
         ActionData data;
+        int errorCount = 0;
         while(true)
         {
-            //Log.d("IdentifyAction: ", "WHILE TRUE");
-            Touch touch = null;
             try {
-                touch = SenseDataList.take();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                return;
-            }
-            if(searchingForFiveStateVariable)
-            {
-                //Log.d("IdentifyAction: ", "SEARCHING FOR FIVE");
-                SenseDataList.clear();
-                searchingForFive(touch, vibrator, speech);
-            }
-            else
-            {
-                if(touch.type == MotionEvent.ACTION_DOWN)
-                {
-                    start = touch;
+                //Log.d("IdentifyAction: ", "WHILE TRUE");
+                Touch touch = null;
+                try {
+                    touch = SenseDataList.take();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    return;
                 }
-                if(touch.type == MotionEvent.ACTION_UP)
-                {
-                    Log.d("IdentifyAction: ", "Not SEARCHING FOR FIVE");
-                    end = touch;
-                    //Touch start = SenseDataList.pollLast();
+                if (searchingForFiveStateVariable) {
+                    //Log.d("IdentifyAction: ", "SEARCHING FOR FIVE");
                     SenseDataList.clear();
-                    if(start == null || end == null)
-                        continue;
-                    Log.d("IdentifyAction: ", "ENTEREDDDDDDDDDD");
-                    data = new ActionData();
-                    data.nextChar = '.';
-                    if (Math.abs(start.pos_x - end.pos_x) > MoveThresholdPos || Math.abs(start.pos_y - end.pos_y) > MoveThresholdPos) {
-                        Log.d("IdentifyAction: ", "MOVEEEEEEEEEEEE");
-                        //Move Action
-                        data.nextAction = getMoveDirection(start, end);
-                        if(data.nextAction == AppConstants.SwipeDirectionUp) {
-                            speech.speak("SEARCH 5", TextToSpeech.QUEUE_FLUSH, null);
-                            searchingForFiveStateVariable = true;
-                            start = null;
+                    searchingForFive(touch, vibrator, speech);
+                } else {
+                    if (touch.type == MotionEvent.ACTION_DOWN) {
+                        start = touch;
+                    }
+                    if (touch.type == MotionEvent.ACTION_UP) {
+                        Log.d("IdentifyAction: ", "Not SEARCHING FOR FIVE");
+                        end = touch;
+                        //Touch start = SenseDataList.pollLast();
+                        SenseDataList.clear();
+                        if (start == null || end == null)
                             continue;
+                        Log.d("IdentifyAction: ", "ENTEREDDDDDDDDDD");
+                        data = new ActionData();
+                        data.nextChar = '.';
+                        if (Math.abs(start.pos_x - end.pos_x) > MoveThresholdPos || Math.abs(start.pos_y - end.pos_y) > MoveThresholdPos) {
+                            Log.d("IdentifyAction: ", "MOVEEEEEEEEEEEE");
+                            //Move Action
+                            data.nextAction = getMoveDirection(start, end);
+                            if (data.nextAction == AppConstants.SwipeDirectionUp) {
+                                speech.speak("SEARCH 5", TextToSpeech.QUEUE_FLUSH, null);
+                                searchingForFiveStateVariable = true;
+                                start = null;
+                                continue;
+                            }
+
+
+                        } else if ((end.timestamp - start.timestamp) < LongPressThresholdTime) {
+                            //Single Click
+                            data.nextChar = getClickedNumber(start, end);
+                            data.nextAction = AppConstants.SingleClick;
+                        } else {
+                            data.nextAction = AppConstants.LongPress;
                         }
-
-
-                    } else if ((end.timestamp - start.timestamp) < LongPressThresholdTime) {
-                        //Single Click
-                        data.nextChar = getClickedNumber(start, end);
-                        data.nextAction = AppConstants.SingleClick;
+                        ActionDataList.add(data);
+                        start = null;
                     }
-                    else {
-                        data.nextAction = AppConstants.LongPress;
-                    }
-                    ActionDataList.add(data);
-                    start = null;
+                }
+            }catch (Exception ex)
+            {
+                ex.printStackTrace();
+                speech.speak("OOPS. THAT WAS UNEXPECTED", TextToSpeech.QUEUE_FLUSH, null);
+                errorCount++;
+                if(errorCount >= 3) {
+                    System.exit(0);
                 }
             }
         }
@@ -116,7 +121,7 @@ public class ActionIdentifier {
         yt = AppConstants.TEXTVIEW_POSITION_Y[1] - (AppConstants.TEXTVIEW_POSITION_Y[5] + AppConstants.TEXTVIEW_HEIGHT /2);
         int complement = (int)(Math.sqrt(xt * xt + yt * yt));
         Log.d("IdentifyAction: ", "SEARCHING FOR FIVE VIBRATING");
-        //vibrate.vibrate(10, strength/10, (complement > strength)?(complement - strength)/10:0);
+        vibrate.vibrate(2, 10 + strength/5, (complement > strength)?(complement - strength)/10:0);
     }
 
 

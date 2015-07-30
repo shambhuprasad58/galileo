@@ -99,6 +99,7 @@ public class KeyboardFSM {
         char nextChar;
         int count = 0;
         T9Dictioary = T9ContactDictionary;
+        int errorCount = 0;
         switch (AppConstants.CurrentAction)
         {
             case AppConstants.CallAction: mode = AppConstants.CallMode; break;
@@ -107,48 +108,48 @@ public class KeyboardFSM {
         }
         String currentString = "";
         while(true) {
-            ActionData data = null;
             try {
-                data = ActionDataList.take();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                return;
-            }
-            nextAction = data.nextAction;
-            nextChar = data.nextChar;
-            switch (nextAction) {
-                case AppConstants.SwipeDirectionDown: //DOWN: delete all data entered
-                    Log.d("galileo_mytag ", "SWIPE UP");
-                    speech.speak("DELETED ALL INPUT", TextToSpeech.QUEUE_FLUSH, null);
-                    //       Call("09800160757", context);
-                    PageStatus = AppConstants.enteringNumbers;
-                    T9Dictioary.clear();
-                    currentString = "";
-                    break;
-                case AppConstants.SwipeDirectionUp: //UP: start search for 5
-                    speech.speak("LOCATE 5", TextToSpeech.QUEUE_FLUSH, null);
-                    PageStatus = AppConstants.searchingFor5;
-                    break;
-                case AppConstants.SwipeDirectionLeft: //LEFT: delete one last digit
-                    //Delete last digit
-                    //speech.speak("BACK", TextToSpeech.QUEUE_FLUSH, null);
-                    if(T9typingMode) {
-                        count = T9Dictioary.filter('\b');
-                        speech.speak("GOING BACK. " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
-                    }
-                    else {
-                        currentString = currentString.substring(0, currentString.length() - 1);
-                        speech.speak("GOING BACK", TextToSpeech.QUEUE_FLUSH, null);
-                    }
-                    break;
-                case AppConstants.SwipeDirectionRight: //RIGHT: Announce to call
-                    //clear all
-                        if(T9typingMode) {
+                ActionData data = null;
+                try {
+                    data = ActionDataList.take();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    return;
+                }
+                nextAction = data.nextAction;
+                nextChar = data.nextChar;
+                switch (nextAction) {
+                    case AppConstants.SwipeDirectionDown: //DOWN: delete all data entered
+                        Log.d("galileo_mytag ", "SWIPE UP");
+                        speech.speak("DELETED ALL INPUT", TextToSpeech.QUEUE_FLUSH, null);
+                        //       Call("09800160757", context);
+                        PageStatus = AppConstants.enteringNumbers;
+                        T9Dictioary.clear();
+                        currentString = "";
+                        break;
+                    case AppConstants.SwipeDirectionUp: //UP: start search for 5
+                        speech.speak("LOCATE 5", TextToSpeech.QUEUE_FLUSH, null);
+                        PageStatus = AppConstants.searchingFor5;
+                        break;
+                    case AppConstants.SwipeDirectionLeft: //LEFT: delete one last digit
+                        //Delete last digit
+                        //speech.speak("BACK", TextToSpeech.QUEUE_FLUSH, null);
+                        if (T9typingMode) {
+                            count = T9Dictioary.filter('\b');
+                            speech.speak("GOING BACK. " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
+                        } else {
+                            if (!currentString.equalsIgnoreCase(""))
+                                currentString = currentString.substring(0, currentString.length() - 1);
+                            speech.speak("GOING BACK", TextToSpeech.QUEUE_FLUSH, null);
+                        }
+                        break;
+                    case AppConstants.SwipeDirectionRight: //RIGHT: Announce to call
+                        //clear all
+                        if (T9typingMode) {
                             if (T9Dictioary.getDictionary().getHead() == null || T9Dictioary.getDictionary().getHead().getSubTreeSize() == 0) {
-                                currentString = T9Dictioary.getCurrentString();
+                                currentString = currentString + T9Dictioary.getCurrentString();
                                 T9Dictioary.clear();
-                            }
-                            else if (T9Dictioary.getDictionary().getHead().getSubTreeSize() < 9) {
+                            } else if (T9Dictioary.getDictionary().getHead().getSubTreeSize() < 9) {
                                 list = T9Dictioary.traverseDictionary();
                                 speech.speak("ANNOUNCING", TextToSpeech.QUEUE_FLUSH, null);
                                 for (int i = 0; i < list.size(); i++) {
@@ -173,7 +174,7 @@ public class KeyboardFSM {
                                 speech.speak("ENTER SMS TEXT", TextToSpeech.QUEUE_FLUSH, null);
                                 break;
                             case AppConstants.SMSTextMode:
-                                SMSText = SMSText.concat(" " + currentString);
+                                SMSText = SMSText.concat(currentString);
                                 break;
                             case AppConstants.EmailIdMode:
                                 EmailId = currentString;
@@ -181,7 +182,7 @@ public class KeyboardFSM {
                                 speech.speak("ENTER EMAIL SUBJECT", TextToSpeech.QUEUE_FLUSH, null);
                                 break;
                             case AppConstants.EmailSubjectMode:
-                                EmailSubject = EmailSubject.concat(" " + currentString);
+                                EmailSubject = EmailSubject.concat(currentString);
                                 mode = AppConstants.EmailBodyMode;
                                 speech.speak("Enter Email Body", TextToSpeech.QUEUE_FLUSH, null);
                                 break;
@@ -190,123 +191,164 @@ public class KeyboardFSM {
                                 EMAIL(context, speech);
                                 break;
                         }
-                    currentString = "";
-                    break;
-                case AppConstants.LongPress:
-                        if(T9typingMode) {
+                        currentString = "";
+                        break;
+                    case AppConstants.LongPress:
+                        if (T9typingMode) {
                             currentString = T9Dictioary.getCurrentString();
                             T9Dictioary.clear();
                         }
-                        switch (mode)
-                        {
-                            case AppConstants.CallMode: Call(null, currentString, context, speech); break;
-                            case AppConstants.SMSContactMode: SMSName = null; SMSNumber = currentString; mode = AppConstants.SMSTextMode;
-                                                                speech.speak("ENTER SMS TEXT", TextToSpeech.QUEUE_FLUSH, null);
-                                                                break;
-                            case AppConstants.SMSTextMode: SMSText = SMSText + currentString; SMS(context, speech); break;
-                            case AppConstants.EmailIdMode: EmailId = currentString; mode = AppConstants.EmailSubjectMode;
-                                                                speech.speak("ENTER EMAIL SUBJECT", TextToSpeech.QUEUE_FLUSH, null);
-                                                                break;
-                            case AppConstants.EmailSubjectMode: EmailSubject = EmailSubject + currentString; mode = AppConstants.EmailBodyMode;
-                                                                speech.speak("Enter Email Body", TextToSpeech.QUEUE_FLUSH, null);
-                                                                break;
-                            case AppConstants.EmailBodyMode: EmailSubject = EmailSubject + currentString; EMAIL(context, speech); break;
-                        }
-                    currentString = "";
-                    break;
-                case AppConstants.SingleClick:
-                    //Single Click
-                    if (PageStatus == AppConstants.enteringNumbers) {
-                        //Next number
-                        if(nextChar == ';')
-                        {
-                            if(mode == AppConstants.SMSTextMode || mode == AppConstants.EmailBodyMode || mode == AppConstants.EmailSubjectMode) {
-                                speech.speak("CHANGING DICTIONARY MODE", TextToSpeech.QUEUE_FLUSH, null);
-                                if (T9typingMode) {
-                                    currentString = T9Dictioary.getCurrentString();
-                                    T9Dictioary.clear();
-                                    T9typingMode = false;
-                                } else
-                                    T9typingMode = true;
-                                switch (mode) {
-                                    case AppConstants.SMSTextMode:
-                                        SMSText = SMSText.concat(currentString);
-                                        break;
-                                    case AppConstants.EmailSubjectMode:
-                                        EmailSubject = EmailSubject.concat(currentString);
-                                        break;
-                                    case AppConstants.EmailBodyMode:
-                                        EmailBody = EmailBody.concat(currentString);
-                                        break;
-                                }
-                                currentString = "";
-                                break;
-                            }
-                        }
-                        if (T9typingMode) {
-                            Log.d("galileo_mytag ", "T9  TAPPPPPEDDDD ");
-                            count = T9Dictioary.filter(nextChar);
-                            speech.speak(digit[nextChar - '0'] + ". " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
-                        } else {
-                            if ((System.currentTimeMillis() - previousTapTime) < AppConstants.doubleTapThreshold && previousKey == nextChar) {
-                                //T9Dictioary.filter('\b');
-                                //count = T9Dictioary.filter(chars[nextChar][tapCount]);
-                                //speech.speak(chars[nextChar][tapCount] + ". " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
-                                Log.d("galileo_mytag ", "ENGLISH  MULTI TAPPPPPEDDDD " + speechchars[nextChar - '0'][tapCount]);
-                                tapCount = (tapCount + 1) % chars[nextChar - '0'].length;
-                                currentString = currentString.substring(0, currentString.length()-1);
-                                currentString = currentString + chars[nextChar - '0'][tapCount];
-                                speech.speak(speechchars[nextChar - '0'][tapCount], TextToSpeech.QUEUE_ADD, null);
-                            } else {
-                                //count = T9Dictioary.filter(nextChar);
-                                //speech.speak(digit[nextChar - '0'] + ". " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
-                                tapCount = 1;
-                                Log.d("galileo_mytag ", "ENGLISH NEW TAPPPPPEDDDD " + chars[nextChar - '0'][1]);
-                                currentString = currentString + chars[nextChar - '0'][1];
-                                speech.speak(speechchars[nextChar - '0'][tapCount], TextToSpeech.QUEUE_FLUSH, null);
-                            }
-                            previousKey = nextChar;
-                            previousTapTime = System.currentTimeMillis();
-                        }
-                    } else if (PageStatus == AppConstants.announcingResults) {
-                        //Call
-                        Log.d("galileo_mytag ", "ANNOUNCING RESULTS CALLING");
-                        T9Dictioary.clear();
-                        ContactData contact = list.get(nextChar - '0' - 1);
-                        PageStatus = AppConstants.enteringNumbers;
                         switch (mode) {
                             case AppConstants.CallMode:
-                                Call(contact.getName(), contact.getNumber(), context, speech);
-                                list.clear();
+                                Call(null, currentString, context, speech);
                                 break;
                             case AppConstants.SMSContactMode:
-                                SMSName = contact.getName();
-                                SMSNumber = contact.getNumber();
+                                SMSName = null;
+                                SMSNumber = currentString;
                                 mode = AppConstants.SMSTextMode;
-                                T9Dictioary = T9WordDictionary;
-                                speech.speak(SMSName + " selected. ENTER SMS TEXT", TextToSpeech.QUEUE_FLUSH, null);
-                                T9Dictioary.clear();
+                                speech.speak("ENTER SMS TEXT", TextToSpeech.QUEUE_FLUSH, null);
                                 break;
                             case AppConstants.SMSTextMode:
-                                SMSText = SMSText.concat(contact.getName());
-                                speech.speak(contact.getName() + "SELECTED", TextToSpeech.QUEUE_FLUSH, null);
+                                SMSText = SMSText + currentString;
+                                SMS(context, speech);
                                 break;
                             case AppConstants.EmailIdMode:
-                                EmailId = contact.getName();
-                                speech.speak(EmailId + " is email id. ENTER SUBJECT TEXT", TextToSpeech.QUEUE_FLUSH, null);
+                                EmailId = currentString;
                                 mode = AppConstants.EmailSubjectMode;
+                                speech.speak("ENTER EMAIL SUBJECT", TextToSpeech.QUEUE_FLUSH, null);
                                 break;
                             case AppConstants.EmailSubjectMode:
-                                EmailSubject = EmailSubject.concat(contact.getName());
-                                speech.speak(contact.getName() + "SELECTED", TextToSpeech.QUEUE_FLUSH, null);
+                                EmailSubject = EmailSubject + currentString;
+                                mode = AppConstants.EmailBodyMode;
+                                speech.speak("Enter Email Body", TextToSpeech.QUEUE_FLUSH, null);
                                 break;
                             case AppConstants.EmailBodyMode:
-                                EmailBody = EmailBody.concat(contact.getName());
-                                speech.speak(contact.getName() + "SELECTED", TextToSpeech.QUEUE_FLUSH, null);
+                                EmailSubject = EmailSubject + currentString;
+                                EMAIL(context, speech);
                                 break;
                         }
-                    }
-                    break;
+                        currentString = "";
+                        break;
+                    case AppConstants.SingleClick:
+                        //Single Click
+                        if (PageStatus == AppConstants.enteringNumbers) {
+                            //Next number
+                            if (nextChar == ';') {
+                                if (mode == AppConstants.SMSTextMode || mode == AppConstants.EmailBodyMode || mode == AppConstants.EmailSubjectMode) {
+                                    speech.speak("CHANGING DICTIONARY MODE", TextToSpeech.QUEUE_FLUSH, null);
+                                    if (T9typingMode) {
+                                        currentString = currentString + T9Dictioary.getCurrentString();
+                                        T9Dictioary.clear();
+                                        T9typingMode = false;
+                                    } else
+                                        T9typingMode = true;
+                                    switch (mode) {
+                                        case AppConstants.SMSTextMode:
+                                            SMSText = SMSText.concat(currentString);
+                                            break;
+                                        case AppConstants.EmailSubjectMode:
+                                            EmailSubject = EmailSubject.concat(currentString);
+                                            break;
+                                        case AppConstants.EmailBodyMode:
+                                            EmailBody = EmailBody.concat(currentString);
+                                            break;
+                                    }
+                                    currentString = "";
+                                    break;
+                                }
+                            }
+                            if(mode == AppConstants.SMSTextMode || mode == AppConstants.EmailSubjectMode || mode == AppConstants.EmailBodyMode) {
+                                if (T9typingMode && nextChar == '0') {
+                                    currentString = T9Dictioary.getCurrentString();
+                                    T9Dictioary.clear();
+                                    switch (mode) {
+                                        case AppConstants.SMSTextMode:
+                                            SMSText = SMSText.concat(currentString + " ");
+                                            break;
+                                        case AppConstants.EmailSubjectMode:
+                                            EmailSubject = EmailSubject.concat(currentString + " ");
+                                            break;
+                                        case AppConstants.EmailBodyMode:
+                                            EmailBody = EmailBody.concat(currentString + " ");
+                                            break;
+                                    }
+                                    currentString = "";
+                                    break;
+                                }
+                            }
+                            if (T9typingMode) {
+                                Log.d("galileo_mytag ", "T9  TAPPPPPEDDDD ");
+                                count = T9Dictioary.filter(nextChar);
+                                speech.speak(digit[nextChar - '0'] + ". " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
+                            } else {
+                                if ((System.currentTimeMillis() - previousTapTime) < AppConstants.doubleTapThreshold && previousKey == nextChar) {
+                                    //T9Dictioary.filter('\b');
+                                    //count = T9Dictioary.filter(chars[nextChar][tapCount]);
+                                    //speech.speak(chars[nextChar][tapCount] + ". " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
+                                    Log.d("galileo_mytag ", "ENGLISH  MULTI TAPPPPPEDDDD " + speechchars[nextChar - '0'][tapCount]);
+                                    tapCount = (tapCount + 1) % chars[nextChar - '0'].length;
+                                    currentString = currentString.substring(0, currentString.length() - 1);
+                                    currentString = currentString + chars[nextChar - '0'][tapCount];
+                                    speech.speak(speechchars[nextChar - '0'][tapCount], TextToSpeech.QUEUE_ADD, null);
+                                } else {
+                                    //count = T9Dictioary.filter(nextChar);
+                                    //speech.speak(digit[nextChar - '0'] + ". " + count + " RESULTS", TextToSpeech.QUEUE_FLUSH, null);
+                                    tapCount = 1;
+                                    Log.d("galileo_mytag ", "ENGLISH NEW TAPPPPPEDDDD " + chars[nextChar - '0'][1]);
+                                    currentString = currentString + chars[nextChar - '0'][1];
+                                    speech.speak(speechchars[nextChar - '0'][tapCount], TextToSpeech.QUEUE_FLUSH, null);
+                                }
+                                previousKey = nextChar;
+                                previousTapTime = System.currentTimeMillis();
+                            }
+                        } else if (PageStatus == AppConstants.announcingResults) {
+                            //Call
+                            Log.d("galileo_mytag ", "ANNOUNCING RESULTS CALLING");
+                            T9Dictioary.clear();
+                            ContactData contact = list.get(nextChar - '0' - 1);
+                            PageStatus = AppConstants.enteringNumbers;
+                            switch (mode) {
+                                case AppConstants.CallMode:
+                                    Call(contact.getName(), contact.getNumber(), context, speech);
+                                    list.clear();
+                                    break;
+                                case AppConstants.SMSContactMode:
+                                    SMSName = contact.getName();
+                                    SMSNumber = contact.getNumber();
+                                    mode = AppConstants.SMSTextMode;
+                                    T9Dictioary = T9WordDictionary;
+                                    speech.speak(SMSName + " selected. ENTER SMS TEXT", TextToSpeech.QUEUE_FLUSH, null);
+                                    T9Dictioary.clear();
+                                    break;
+                                case AppConstants.SMSTextMode:
+                                    SMSText = SMSText.concat(contact.getName());
+                                    speech.speak(contact.getName() + "SELECTED", TextToSpeech.QUEUE_FLUSH, null);
+                                    break;
+                                case AppConstants.EmailIdMode:
+                                    EmailId = contact.getName();
+                                    speech.speak(EmailId + " is email id. ENTER SUBJECT TEXT", TextToSpeech.QUEUE_FLUSH, null);
+                                    mode = AppConstants.EmailSubjectMode;
+                                    break;
+                                case AppConstants.EmailSubjectMode:
+                                    EmailSubject = EmailSubject.concat(contact.getName());
+                                    speech.speak(contact.getName() + "SELECTED", TextToSpeech.QUEUE_FLUSH, null);
+                                    break;
+                                case AppConstants.EmailBodyMode:
+                                    EmailBody = EmailBody.concat(contact.getName());
+                                    speech.speak(contact.getName() + "SELECTED", TextToSpeech.QUEUE_FLUSH, null);
+                                    break;
+                            }
+                        }
+                        break;
+                }
+            }catch (Exception ex)
+            {
+                ex.printStackTrace();
+                speech.speak("OOPS. THAT WAS UNEXPECTED", TextToSpeech.QUEUE_FLUSH, null);
+                errorCount++;
+                if(errorCount >= 3) {
+                    System.exit(0);
+                }
             }
         }
     }

@@ -23,7 +23,7 @@
                 android:layout_width="0dp"
                 android:layout_weight=".33"
                 android:layout_height="match_parent"
-                android:text="1"
+                android:text=".,@1"
                 android:textSize="@dimen/activity_number_size"
                 android:gravity="center"
                 android:id="@+id/TextView1"/>
@@ -31,7 +31,7 @@
                 android:layout_width="0dp"
                 android:layout_weight=".33"
                 android:layout_height="match_parent"
-                android:text="2"
+                android:text="ABC2"
                 android:textSize="@dimen/activity_number_size"
                 android:gravity="center"
                 android:id="@+id/TextView2"/>
@@ -39,7 +39,7 @@
                 android:layout_width="0dp"
                 android:layout_weight=".33"
                 android:layout_height="match_parent"
-                android:text="3"
+                android:text="DEF3"
                 android:textSize="@dimen/activity_number_size"
                 android:gravity="center"
                 android:id="@+id/TextView3"/>
@@ -56,7 +56,7 @@
                 android:layout_width="0dp"
                 android:layout_weight=".33"
                 android:layout_height="match_parent"
-                android:text="4"
+                android:text="GHI4"
                 android:textSize="@dimen/activity_number_size"
                 android:gravity="center"
                 android:id="@+id/TextView4"/>
@@ -64,7 +64,7 @@
                 android:layout_width="0dp"
                 android:layout_weight=".33"
                 android:layout_height="match_parent"
-                android:text="5"
+                android:text="JKL5"
                 android:textSize="@dimen/activity_number_size"
                 android:gravity="center"
                 android:id="@+id/TextView5"/>
@@ -72,7 +72,7 @@
                 android:layout_width="0dp"
                 android:layout_weight=".33"
                 android:layout_height="match_parent"
-                android:text="6"
+                android:text="MNO6"
                 android:textSize="@dimen/activity_number_size"
                 android:gravity="center"
                 android:id="@+id/TextView6"/>
@@ -89,7 +89,7 @@
                 android:layout_width="0dp"
                 android:layout_weight=".33"
                 android:layout_height="match_parent"
-                android:text="7"
+                android:text="PQRS7"
                 android:textSize="@dimen/activity_number_size"
                 android:gravity="center"
                 android:id="@+id/TextView7"/>
@@ -97,7 +97,7 @@
                 android:layout_width="0dp"
                 android:layout_weight=".33"
                 android:layout_height="match_parent"
-                android:text="8"
+                android:text="TUV8"
                 android:textSize="@dimen/activity_number_size"
                 android:gravity="center"
                 android:id="@+id/TextView8"/>
@@ -105,7 +105,7 @@
                 android:layout_width="0dp"
                 android:layout_weight=".33"
                 android:layout_height="match_parent"
-                android:text="9"
+                android:text="WXYZ9"
                 android:textSize="@dimen/activity_number_size"
                 android:gravity="center"
                 android:id="@+id/TextView9"/>

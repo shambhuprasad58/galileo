@@ -210,10 +210,9 @@ public class MainActivity extends AppCompatActivity{
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        AppConstants.speech.speak("LETS " + AppConstants.currentActionSpeech,
+        AppConstants.speech.speak("LETS " + AppConstants.currentActionSpeech + ". SEARCH 5",
                 TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
                 null);
-        AppConstants.speech.speak("SEARCH 5", TextToSpeech.QUEUE_FLUSH, null);
         createThreads();
         retrievePositions();
     }
